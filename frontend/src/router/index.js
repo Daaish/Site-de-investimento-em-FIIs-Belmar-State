@@ -10,6 +10,7 @@ import CarteiraView from '../views/CarteiraView.vue'
 import CalendarioView from '../views/CalendarioView.vue'
 import ConquistasView from '../views/ConquistasView.vue'
 import DnaView from '../views/DnaView.vue'
+import BelmarAcademyView from '../views/BelmarAcademyView.vue'
 import BelmarDigitalView from '../views/BelmarDigitalView.vue'
 import ExplorarView from '../views/ExplorarView.vue'
 
@@ -19,6 +20,7 @@ const router = createRouter({
     { path: '/login', name: 'login', component: LoginView, meta: { publica: true, somenteVisitante: true, authPage: true } },
     { path: '/cadastro', name: 'cadastro', component: CadastroView, meta: { publica: true, somenteVisitante: true, authPage: true } },
     { path: '/', name: 'dashboard', component: DashboardView },
+    { path: '/academy', name: 'academy', component: BelmarAcademyView, meta: { publica: true } },
     { path: '/digital', name: 'digital', component: BelmarDigitalView, meta: { publica: true } },
     { path: '/explorar', name: 'explorar', component: ExplorarView, meta: { publica: true } },
     { path: '/carteira', name: 'carteira', component: CarteiraView },

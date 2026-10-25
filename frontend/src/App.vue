@@ -25,6 +25,7 @@ watch(() => route.path, () => { menuAberto.value = false })
 
 const menu = [
   { nome: 'Visão Geral', rota: '/', icone: '◈' },
+  { nome: 'Belmar Academy', rota: '/academy', icone: '▤' },
   { nome: 'Belmar Digital', rota: '/digital', icone: '◇' },
   { nome: 'Mercado de FIIs', rota: '/explorar', icone: '⌕' },
   { nome: 'Carteira Patrimonial', rota: '/carteira', icone: '▣' },
