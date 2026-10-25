@@ -216,7 +216,7 @@ function desfazerUltima() {
     <div class="eyebrow">BELMAR STATE / PORTFÓLIO</div>
 
     <h1>
-      Minha Carteira <span class="accent">.</span>
+      Carteira Patrimonial <span class="accent">.</span>
     </h1>
 
     <p>
@@ -589,9 +589,9 @@ function desfazerUltima() {
 }
 
 .painel {
-  background: #101a2a;
-  border: 1px solid #223047;
-  border-radius: 14px;
+  background: var(--bm-surface);
+  border: 1px solid var(--bm-border);
+  border-radius: var(--bm-radius);
   padding: 24px;
   min-width: 0;
 }
@@ -614,7 +614,7 @@ form {
 
 label {
   font-size: 13px;
-  color: #aab8cc;
+  color: var(--bm-text-secondary);
   margin-top: 8px;
 }
 
@@ -623,17 +623,16 @@ select {
   width: 100%;
   min-width: 0;
   padding: 13px;
-  border: 1px solid #314158;
+  border: 1px solid var(--bm-input-border);
   border-radius: 9px;
-  background: #0a1120;
-  color: #f0f5fc;
-  outline: none;
+  background: var(--bm-surface);
+  color: var(--bm-text);
   font: inherit;
 }
 
 input:focus,
 select:focus {
-  border-color: #20d69f;
+  border-color: var(--bs-selection-border);
 }
 
 .botao-full {
@@ -649,13 +648,13 @@ select:focus {
 }
 
 .erro {
-  background: #40232b;
-  color: #ffaaaa;
+  background: var(--bm-warning-bg);
+  color: var(--bm-warning-text);
 }
 
 .sucesso {
-  background: #15382d;
-  color: #4aebba;
+  background: var(--bm-info-bg);
+  color: var(--bm-text);
 }
 
 .historico {
@@ -671,16 +670,16 @@ select:focus {
 
 .botao-secundario {
   background: transparent;
-  border: 1px solid #405066;
-  color: #b7c6d8;
+  border: 1px solid var(--bm-input-border);
+  color: var(--bm-text);
   border-radius: 8px;
   padding: 10px 13px;
   cursor: pointer;
 }
 
 .botao-secundario:hover {
-  border-color: #20d69f;
-  color: #20d69f;
+  border-color: var(--bs-selection-border);
+  color: var(--bs-link);
 }
 
 .tipo-operacao {
@@ -691,24 +690,24 @@ select:focus {
 }
 
 .compra {
-  background: #153c30;
-  color: #32dfa7;
+  background: var(--bm-info-bg);
+  color: var(--bm-text);
 }
 
 .venda {
-  background: #432b31;
-  color: #ffa4aa;
+  background: var(--bm-surface-muted);
+  color: var(--bm-text);
 }
 
 .estado-vazio {
   text-align: center;
   padding: 50px 12px;
-  color: #8796ac;
+  color: var(--bm-text-secondary);
 }
 
 .estado-vazio div {
   font-size: 40px;
-  color: #20d69f;
+  color: var(--bs-link);
 }
 
 .estado-vazio h3 {
@@ -721,6 +720,7 @@ select:focus {
 }
 
 @media (max-width: 1100px) {
+  .carteira-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .carteira-layout {
     grid-template-columns: 1fr;
   }
@@ -760,8 +760,12 @@ select:focus {
   gap: 18px;
 }
 
+@media (min-width: 761px) and (max-width: 1100px) {
+  .mercado-indicadores { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
 .negativo {
-  color: #fb7185;
+  color: var(--bm-negative);
 }
 
 .variacao {

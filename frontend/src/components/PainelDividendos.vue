@@ -11,6 +11,7 @@ import {
   Legend,
 } from 'chart.js'
 
+import { useChartTheme } from '../composables/useChartTheme'
 import { useCarteira } from '../composables/useCarteira'
 
 ChartJS.register(
@@ -20,6 +21,8 @@ ChartJS.register(
   Tooltip,
   Legend
 )
+
+const chartTheme = useChartTheme()
 
 const { operacoes } = useCarteira()
 
@@ -201,7 +204,7 @@ const dadosGrafico = computed(() => ({
     {
       label: 'Confirmados',
       data: resumoMensal.value.map(m => m.confirmados),
-      backgroundColor: '#20d69f',
+      backgroundColor: chartTheme.value.positive,
       borderRadius: 6,
       maxBarThickness: 28,
       stack: 'proventos',
@@ -209,7 +212,7 @@ const dadosGrafico = computed(() => ({
     {
       label: 'Estimados',
       data: resumoMensal.value.map(m => m.estimados),
-      backgroundColor: '#fbbf24',
+      backgroundColor: chartTheme.value.gold,
       borderRadius: 6,
       maxBarThickness: 28,
       stack: 'proventos',
@@ -217,7 +220,7 @@ const dadosGrafico = computed(() => ({
   ],
 }))
 
-const opcoesGrafico = {
+const opcoesGrafico = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
   interaction: {
@@ -228,12 +231,13 @@ const opcoesGrafico = {
     legend: {
       position: 'bottom',
       labels: {
-        color: '#b9c8db',
+        color: chartTheme.value.text,
         padding: 20,
         usePointStyle: true,
       },
     },
     tooltip: {
+      ...chartTheme.value.tooltip,
       callbacks: {
         label: contexto =>
           `${contexto.dataset.label}: ${moeda(contexto.parsed.y)}`,
@@ -242,15 +246,17 @@ const opcoesGrafico = {
   },
   scales: {
     x: {
+      border: { color: chartTheme.value.border },
       stacked: true,
-      ticks: { color: '#91a2bb' },
+      ticks: { color: chartTheme.value.text },
       grid: { display: false },
     },
     y: {
+      border: { color: chartTheme.value.border },
       stacked: true,
       beginAtZero: true,
       ticks: {
-        color: '#91a2bb',
+        color: chartTheme.value.text,
         callback: valor =>
           Number(valor).toLocaleString('pt-BR', {
             style: 'currency',
@@ -258,10 +264,10 @@ const opcoesGrafico = {
             maximumFractionDigits: 0,
           }),
       },
-      grid: { color: '#243248' },
+      grid: { color: chartTheme.value.border },
     },
   },
-}
+}))
 
 function mudarAno(direcao) {
   ano.value += direcao
@@ -387,9 +393,9 @@ function mudarAno(direcao) {
 
 <style scoped>
 .dividendos-card {
-  background: #101a2a;
-  border: 1px solid #223047;
-  border-radius: 14px;
+  background: var(--bm-surface);
+  border: 1px solid var(--bm-border);
+  border-radius: var(--bm-radius);
   padding: 26px;
   margin-top: 24px;
 }
@@ -415,19 +421,19 @@ function mudarAno(direcao) {
   display: flex;
   align-items: center;
   gap: 15px;
-  background: #0b1423;
-  border: 1px solid #2b3c53;
+  background: var(--bm-surface-muted);
+  border: 1px solid var(--bm-border);
   border-radius: 9px;
   padding: 5px;
 }
 
 .seletor-ano button {
-  background: #1b2b40;
+  background: var(--bs-action-bg);
   border: 0;
   border-radius: 7px;
   width: 32px;
   height: 32px;
-  color: #edf2fb;
+  color: var(--bm-text);
   font-size: 22px;
   cursor: pointer;
 }
@@ -446,8 +452,8 @@ function mudarAno(direcao) {
 }
 
 .indicador {
-  background: #0c1524;
-  border: 1px solid #253449;
+  background: var(--bm-surface-muted);
+  border: 1px solid var(--bm-border);
   padding: 18px;
   border-radius: 11px;
   min-width: 0;
@@ -456,20 +462,20 @@ function mudarAno(direcao) {
 .indicador span,
 .indicador small {
   display: block;
-  color: #8b9bb1;
+  color: var(--bm-text-secondary);
   font-size: 12px;
 }
 
 .indicador strong {
   display: block;
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--bm-font-heading);
   font-size: clamp(19px, 2vw, 26px);
   margin: 12px 0 7px;
   overflow-wrap: anywhere;
 }
 
-.indicador .verde { color: #20d69f; }
-.indicador .amarelo { color: #fbbf24; }
+.indicador .verde { color: var(--bm-positive); }
+.indicador .amarelo { color: var(--bm-gold); }
 
 .indicador small {
   font-size: 10px;
@@ -485,13 +491,13 @@ function mudarAno(direcao) {
   display: flex;
   gap: 20px;
   flex-wrap: wrap;
-  color: #91a2bb;
+  color: var(--bm-text-secondary);
   font-size: 12px;
   margin: 15px 0;
 }
 
 .ranking {
-  border-top: 1px solid #253449;
+  border-top: 1px solid var(--bm-border);
   padding-top: 25px;
   margin-top: 25px;
 }
@@ -516,8 +522,8 @@ function mudarAno(direcao) {
 .ranking-posicao {
   width: 35px;
   height: 35px;
-  background: #19372f;
-  color: #38dfa9;
+  background: var(--bm-surface-muted);
+  color: var(--bm-text);
   border-radius: 9px;
   display: grid;
   place-items: center;
@@ -538,25 +544,25 @@ function mudarAno(direcao) {
   margin-bottom: 9px;
 }
 
-.ranking-titulo span { color: #dce7f5; }
+.ranking-titulo span { color: var(--bm-text); }
 
 .barra {
   height: 7px;
-  background: #29374b;
+  background: var(--bm-border);
   border-radius: 10px;
   overflow: hidden;
 }
 
 .barra div {
   height: 100%;
-  background: #20d69f;
+  background: var(--bm-positive);
   border-radius: 10px;
 }
 
 .ranking-info small {
   display: block;
   font-size: 10px;
-  color: #7f91a9;
+  color: var(--bm-text-secondary);
   margin-top: 6px;
 }
 
@@ -571,7 +577,7 @@ function mudarAno(direcao) {
 
 .nota {
   font-size: 11px;
-  color: #71849d;
+  color: var(--bm-text-secondary);
   margin: 25px 0 0;
   line-height: 1.6;
 }
@@ -587,5 +593,10 @@ function mudarAno(direcao) {
   .cabecalho { flex-direction: column; }
   .indicadores { grid-template-columns: 1fr; }
   .grafico { height: 270px; }
+}
+
+@media (max-width: 760px) {
+  .cabecalho h2 { font-size: 20px; }
+  .ranking-titulo { flex-wrap: wrap; gap: 5px; }
 }
 </style>

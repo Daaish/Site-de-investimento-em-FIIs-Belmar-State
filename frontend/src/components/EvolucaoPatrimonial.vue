@@ -14,6 +14,7 @@ import {
   Filler,
 } from 'chart.js'
 
+import { useChartTheme } from '../composables/useChartTheme'
 import { useCarteira } from '../composables/useCarteira'
 import {
   buscarHistoricos,
@@ -29,6 +30,8 @@ ChartJS.register(
   Legend,
   Filler
 )
+
+const chartTheme = useChartTheme()
 
 const { operacoes } = useCarteira()
 
@@ -177,8 +180,8 @@ const dadosGrafico = computed(() => {
         {
           label: 'Desempenho acumulado (%)',
           data: pontosFiltrados.value.map(p => p.desempenho),
-          borderColor: '#20d69f',
-          backgroundColor: 'rgba(32,214,159,0.12)',
+          borderColor: chartTheme.value.positive,
+          backgroundColor: chartTheme.value.fill,
           borderWidth: 3,
           pointRadius: 0,
           pointHoverRadius: 5,
@@ -195,7 +198,7 @@ const dadosGrafico = computed(() => {
       {
         label: 'Capital investido',
         data: pontosFiltrados.value.map(p => p.investido),
-        borderColor: '#60a5fa',
+        borderColor: chartTheme.value.blue,
         borderWidth: 2,
         pointRadius: 0,
         pointHoverRadius: 5,
@@ -205,8 +208,8 @@ const dadosGrafico = computed(() => {
       {
         label: 'Valor de mercado',
         data: pontosFiltrados.value.map(p => p.mercado),
-        borderColor: '#20d69f',
-        backgroundColor: 'rgba(32,214,159,0.10)',
+        borderColor: chartTheme.value.positive,
+        backgroundColor: chartTheme.value.fill,
         borderWidth: 2.5,
         pointRadius: 0,
         pointHoverRadius: 5,
@@ -230,12 +233,13 @@ const opcoes = computed(() => ({
     legend: {
       position: 'bottom',
       labels: {
-        color: '#b9c8db',
+        color: chartTheme.value.text,
         usePointStyle: true,
         padding: 20,
       },
     },
     tooltip: {
+      ...chartTheme.value.tooltip,
       callbacks: {
         label: ctx => {
           if (modoGrafico.value === 'desempenho') {
@@ -249,16 +253,18 @@ const opcoes = computed(() => ({
   },
   scales: {
     x: {
+      border: { color: chartTheme.value.border },
       ticks: {
-        color: '#8b9bb1',
+        color: chartTheme.value.text,
         maxTicksLimit: 9,
         maxRotation: 0,
       },
       grid: { display: false },
     },
     y: {
+      border: { color: chartTheme.value.border },
       ticks: {
-        color: '#8b9bb1',
+        color: chartTheme.value.text,
         callback: valor => {
           if (modoGrafico.value === 'desempenho') {
             return `${Number(valor).toFixed(1)}%`
@@ -270,7 +276,7 @@ const opcoes = computed(() => ({
           })
         },
       },
-      grid: { color: '#253349' },
+      grid: { color: chartTheme.value.border },
     },
   },
 }))
@@ -419,9 +425,9 @@ const opcoes = computed(() => ({
 
 <style scoped>
 .historico-card {
-  background: #101a2a;
-  border: 1px solid #223047;
-  border-radius: 14px;
+  background: var(--bm-surface);
+  border: 1px solid var(--bm-border);
+  border-radius: var(--bm-radius);
   padding: 26px;
   margin-top: 24px;
 }
@@ -444,9 +450,9 @@ const opcoes = computed(() => ({
 }
 
 .atualizar {
-  background: #15382e;
-  color: #35e4ae;
-  border: 1px solid #267859;
+  background: var(--bs-action-bg);
+  color: var(--bs-action-text);
+  border: 1px solid var(--bs-action-bg);
   border-radius: 9px;
   padding: 11px 16px;
   cursor: pointer;
@@ -464,18 +470,18 @@ const opcoes = computed(() => ({
 }
 
 .filtros button {
-  border: 1px solid #2d3d54;
-  background: #101e30;
-  color: #9aacc2;
+  border: 1px solid var(--bm-border);
+  background: var(--bm-surface);
+  color: var(--bm-text-secondary);
   padding: 9px 14px;
   border-radius: 8px;
   cursor: pointer;
 }
 
 .filtros button.ativo {
-  background: #194537;
-  border-color: #24cb98;
-  color: #4cecb8;
+  background: var(--bs-action-bg);
+  border-color: var(--bs-selection-border);
+  color: var(--bs-action-text);
 }
 
 .resumo {
@@ -486,15 +492,15 @@ const opcoes = computed(() => ({
 }
 
 .resumo > div {
-  background: #0b1423;
-  border: 1px solid #253449;
+  background: var(--bm-surface-muted);
+  border: 1px solid var(--bm-border);
   padding: 18px;
   border-radius: 10px;
 }
 
 .resumo span {
   display: block;
-  color: #8b9bb1;
+  color: var(--bm-text-secondary);
   font-size: 12px;
   margin-bottom: 10px;
 }
@@ -503,8 +509,8 @@ const opcoes = computed(() => ({
   font-size: 21px;
 }
 
-.positivo { color: #20d69f; }
-.negativo { color: #fb7185; }
+.positivo { color: var(--bm-positive); }
+.negativo { color: var(--bm-negative); }
 
 .grafico {
   height: 355px;
@@ -516,7 +522,7 @@ const opcoes = computed(() => ({
   display: flex;
   flex-wrap: wrap;
   gap: 20px;
-  color: #91a2bb;
+  color: var(--bm-text-secondary);
   font-size: 12px;
   margin-top: 18px;
 }
@@ -524,7 +530,7 @@ const opcoes = computed(() => ({
 .mensagem,
 .estado-vazio {
   text-align: center;
-  color: #9daec4;
+  color: var(--bm-text-secondary);
   padding: 40px 15px;
 }
 
@@ -537,9 +543,9 @@ const opcoes = computed(() => ({
 }
 
 .aviso {
-  background: #302b1c;
-  border: 1px solid #665934;
-  color: #ecd49e;
+  background: var(--bm-warning-bg);
+  border: 1px solid var(--bm-warning-border);
+  color: var(--bm-warning-text);
   border-radius: 9px;
   padding: 14px;
   margin-top: 18px;
@@ -550,7 +556,7 @@ const opcoes = computed(() => ({
 
 .nota {
   font-size: 11px;
-  color: #71849d;
+  color: var(--bm-text-secondary);
   margin: 24px 0 0;
   line-height: 1.6;
 }
@@ -570,15 +576,15 @@ const opcoes = computed(() => ({
   gap: 6px;
   padding: 5px;
   margin-top: 25px;
-  border: 1px solid #2d3d54;
-  background: #0b1423;
+  border: 1px solid var(--bm-border);
+  background: var(--bm-surface-muted);
   border-radius: 11px;
 }
 
 .seletor-modo button {
   border: 0;
   background: transparent;
-  color: #9aacc2;
+  color: var(--bm-text-secondary);
   padding: 12px 19px;
   border-radius: 8px;
   cursor: pointer;
@@ -589,12 +595,12 @@ const opcoes = computed(() => ({
 }
 
 .seletor-modo button:hover {
-  color: #edf2fb;
+  color: var(--bm-text);
 }
 
 .seletor-modo button.ativo {
-  background: #194537;
-  color: #4cecb8;
+  background: var(--bs-action-bg);
+  color: var(--bs-action-text);
 }
 
 @media (max-width: 760px) {
@@ -609,4 +615,8 @@ const opcoes = computed(() => ({
   }
 }
 
+
+@media (max-width: 760px) {
+  .cabecalho h2 { font-size: 20px; }
+}
 </style>

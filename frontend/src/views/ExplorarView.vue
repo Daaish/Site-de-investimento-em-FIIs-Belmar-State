@@ -122,7 +122,7 @@ function limparFiltros() {
 
     <div class="cabecalho">
       <div>
-        <h1>Explorar FIIs <span class="accent">.</span></h1>
+        <h1>Mercado de FIIs <span class="accent">.</span></h1>
         <p>
           Descubra e compare fundos imobiliários
           disponíveis em nossa base de dados.
@@ -317,16 +317,16 @@ function limparFiltros() {
 .cabecalho p { margin: 0; }
 
 .atualizar, .limpar {
-  background: #132c29;
-  border: 1px solid #275b4d;
-  color: #34e4ac;
+  background: var(--bs-action-bg);
+  border: 1px solid var(--bs-action-bg);
+  color: var(--bs-action-text);
   padding: 12px 17px;
   border-radius: 9px;
   cursor: pointer;
 }
 
 .atualizar:hover, .limpar:hover {
-  background: #1d4238;
+  background: var(--bs-action-bg);
 }
 
 .atualizar:disabled { opacity: .5; cursor: not-allowed; }
@@ -335,14 +335,14 @@ function limparFiltros() {
   display: flex;
   gap: 15px;
   align-items: flex-start;
-  background: #14273a;
-  border: 1px solid #2e4761;
+  background: var(--bm-info-bg);
+  border: 1px solid var(--bm-border);
   border-radius: 12px;
   padding: 17px;
   margin: 27px 0;
 }
 
-.aviso-base > span { font-size: 24px; color: #8fbef0; }
+.aviso-base > span { font-size: 24px; color: var(--bs-link); }
 .aviso-base strong { font-size: 13px; }
 .aviso-base p { font-size: 12px; margin: 5px 0 0; }
 
@@ -354,9 +354,9 @@ function limparFiltros() {
 }
 
 .painel-filtros {
-  background: #101a2a;
-  border: 1px solid #223047;
-  border-radius: 14px;
+  background: var(--bm-surface);
+  border: 1px solid var(--bm-border);
+  border-radius: var(--bm-radius);
   padding: 26px;
 }
 
@@ -380,7 +380,7 @@ function limparFiltros() {
 
 .filtros-grid {
   display: grid;
-  grid-template-columns: 1.6fr 1fr 1fr 1fr;
+  grid-template-columns: minmax(0, 1.6fr) repeat(3, minmax(0, 1fr));
   gap: 14px;
 }
 
@@ -391,22 +391,21 @@ function limparFiltros() {
   min-width: 0;
 }
 
-.campo label { color: #9dacbf; font-size: 12px; }
+.campo label { color: var(--bm-text-secondary); font-size: 12px; }
 
 .campo input, .campo select {
   width: 100%;
   min-width: 0;
-  background: #0a1120;
-  border: 1px solid #314158;
+  background: var(--bm-surface);
+  border: 1px solid var(--bm-input-border);
   border-radius: 9px;
   padding: 13px;
-  color: #edf3fd;
+  color: var(--bm-text);
   font: inherit;
-  outline: none;
 }
 
 .campo input:focus, .campo select:focus {
-  border-color: #20d69f;
+  border-color: var(--bs-selection-border);
 }
 
 .resultados-topo { margin-top: 35px; }
@@ -418,16 +417,15 @@ function limparFiltros() {
 }
 
 .fundo-card {
-  background: #101a2a;
-  border: 1px solid #223047;
-  border-radius: 14px;
+  background: var(--bm-surface);
+  border: 1px solid var(--bm-border);
+  border-radius: var(--bm-radius);
   padding: 23px;
   transition: .2s;
 }
 
 .fundo-card:hover {
-  border-color: #20d69f;
-  transform: translateY(-2px);
+  border-color: var(--bm-gold);
 }
 
 .fundo-topo {
@@ -440,8 +438,8 @@ function limparFiltros() {
   width: 46px;
   height: 46px;
   border-radius: 12px;
-  background: #173b32;
-  color: #34e4ac;
+  background: var(--bm-surface-muted);
+  color: var(--bs-link);
   font-weight: 800;
   display: grid;
   place-items: center;
@@ -450,11 +448,11 @@ function limparFiltros() {
 
 .fundo-identificacao { min-width: 0; flex: 1; }
 .fundo-identificacao h3 { font-size: 19px; margin: 0; }
-.fundo-identificacao span { color: #93a4bb; font-size: 12px; }
+.fundo-identificacao span { overflow-wrap: anywhere; color: var(--bm-text-secondary); font-size: 12px; }
 
 .tipo-badge {
-  background: #1d3443;
-  color: #a8c5e0;
+  background: var(--bm-surface-muted);
+  color: var(--bm-text-secondary);
   padding: 7px 10px;
   border-radius: 20px;
   font-size: 11px;
@@ -468,13 +466,15 @@ function limparFiltros() {
 }
 
 .fundo-indicadores > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
 .fundo-indicadores span {
-  color: #8b9bb1;
+  color: var(--bm-text-secondary);
   font-size: 12px;
 }
 
@@ -484,27 +484,27 @@ function limparFiltros() {
   display: flex;
   justify-content: space-between;
   gap: 12px;
-  border-top: 1px solid #27364a;
+  border-top: 1px solid var(--bm-border);
   padding-top: 17px;
   align-items: center;
 }
 
-.fundo-rodape span { color: #7e91a8; font-size: 11px; }
-.link-carteira { color: #2cdaa6; font-weight: 700; font-size: 12px; }
+.fundo-rodape span { color: var(--bm-text-secondary); font-size: 11px; }
+.link-carteira { color: var(--bs-link); font-weight: 700; font-size: 12px; }
 
 .estado-vazio, .mensagem-erro {
   text-align: center;
-  background: #101a2a;
-  border: 1px solid #223047;
+  background: var(--bm-surface);
+  border: 1px solid var(--bm-border);
   border-radius: 13px;
   padding: 45px 20px;
 }
 
-.icone-vazio { color: #20d69f; font-size: 45px; }
-.mensagem-erro p { color: #ffaaaa; }
+.icone-vazio { color: var(--bs-link); font-size: 45px; }
+.mensagem-erro p { color: var(--bm-warning-text); }
 .mensagem-erro button {
-  background: #20d69f;
-  color: #081910;
+  background: var(--bs-action-bg);
+  color: var(--bs-action-text);
   border: 0;
   border-radius: 8px;
   padding: 11px 18px;
@@ -514,6 +514,7 @@ function limparFiltros() {
 .aviso-rodape { margin-top: 24px; font-size: 12px; }
 
 @media (max-width: 1100px) {
+  .stats-explorar { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .filtros-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
@@ -523,6 +524,8 @@ function limparFiltros() {
     grid-template-columns: 1fr;
   }
   .painel-filtros { padding: 17px; }
+  .fundo-topo, .fundo-rodape, .resultados-topo { flex-wrap: wrap; }
+  .fundo-identificacao { flex-basis: 120px; }
   .filtros-titulo { flex-direction: column; align-items: flex-start; }
 }
 </style>

@@ -9,24 +9,18 @@ import {
   Legend
 } from 'chart.js'
 
+import { useChartTheme } from '../composables/useChartTheme'
 import { useCarteira } from '../composables/useCarteira'
 import { useCotacoes } from '../composables/useCotacoes'
 
 ChartJS.register(ArcElement, Tooltip, Legend)
 
+const chartTheme = useChartTheme()
+
 const { posicoes } = useCarteira()
 const { cotacoes } = useCotacoes()
 
-const cores = [
-  '#20d69f',
-  '#60a5fa',
-  '#a78bfa',
-  '#fbbf24',
-  '#fb7185',
-  '#22d3ee',
-  '#f97316',
-  '#c084fc',
-]
+const cores = computed(() => chartTheme.value.palette)
 
 const moeda = valor =>
   Number(valor).toLocaleString('pt-BR', {
@@ -63,15 +57,15 @@ const dadosGrafico = computed(() => ({
   datasets: [{
     data: distribuicao.value.map(fii => fii.valor ?? 0),
     backgroundColor: distribuicao.value.map(
-      (_, indice) => cores[indice % cores.length]
+      (_, indice) => cores.value[indice % cores.value.length]
     ),
-    borderColor: '#101a2a',
+    borderColor: chartTheme.value.surface,
     borderWidth: 3,
     hoverOffset: 8,
   }]
 }))
 
-const opcoes = {
+const opcoes = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
   cutout: '73%',
@@ -80,13 +74,14 @@ const opcoes = {
       display: false,
     },
     tooltip: {
+      ...chartTheme.value.tooltip,
       callbacks: {
         label: contexto =>
           `${contexto.label}: ${moeda(contexto.parsed)}`
       }
     }
   }
-}
+}))
 </script>
 
 <template>
@@ -144,9 +139,9 @@ const opcoes = {
 
 <style scoped>
 .grafico-card {
-  background: #101a2a;
-  border: 1px solid #223047;
-  border-radius: 14px;
+  background: var(--bm-surface);
+  border: 1px solid var(--bm-border);
+  border-radius: var(--bm-radius);
   padding: 26px;
   margin-top: 24px;
 }
@@ -169,8 +164,8 @@ const opcoes = {
 }
 
 .grafico-tag {
-  background: #17392f;
-  color: #34e4ac;
+  background: var(--bm-surface-muted);
+  color: var(--bm-text);
   padding: 8px 12px;
   border-radius: 20px;
   font-size: 11px;
@@ -203,13 +198,13 @@ const opcoes = {
 }
 
 .grafico-centro span {
-  color: #8393ab;
+  color: var(--bm-text-secondary);
   font-size: 12px;
 }
 
 .grafico-centro strong {
   font-size: 19px;
-  color: #edf2fb;
+  color: var(--bm-text);
   margin-top: 5px;
 }
 
@@ -234,13 +229,13 @@ const opcoes = {
   border-radius: 4px;
 }
 
-.ticker { flex: 1; color: #a9b8cb; }
-.legenda-item strong { color: #edf2fb; }
+.ticker { flex: 1; color: var(--bm-text-secondary); }
+.legenda-item strong { color: var(--bm-text); }
 
 .grafico-vazio {
   text-align: center;
   padding: 60px 15px;
-  color: #91a2b7;
+  color: var(--bm-text-secondary);
 }
 
 @media (max-width: 760px) {
@@ -257,5 +252,10 @@ const opcoes = {
   .legenda { width: 100%; max-width: none; }
 
   .grafico-card { padding: 17px; }
+}
+
+@media (max-width: 760px) {
+  .grafico-cabecalho { flex-wrap: wrap; }
+  .grafico-cabecalho h2 { font-size: 20px; }
 }
 </style>

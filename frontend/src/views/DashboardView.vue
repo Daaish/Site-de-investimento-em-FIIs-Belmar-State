@@ -116,25 +116,25 @@ function horario(data) {
 
 const atalhos = [
   {
-    titulo: 'Minha Carteira',
+    titulo: 'Carteira Patrimonial',
     desc: 'Gerencie suas operações e posições',
     rota: '/carteira',
     icone: '▣',
   },
   {
-    titulo: 'Calendário',
+    titulo: 'Agenda de Proventos',
     desc: 'Acompanhe os proventos dos seus FIIs',
     rota: '/calendario',
     icone: '▦',
   },
   {
-    titulo: 'Conquistas',
-    desc: 'Veja suas medalhas e níveis',
+    titulo: 'Jornada do Investidor',
+    desc: 'Acompanhe sua jornada de investimento',
     rota: '/conquistas',
     icone: '✦',
   },
   {
-    titulo: 'Meu DNA',
+    titulo: 'Perfil do Investidor',
     desc: 'Descubra suas preferências',
     rota: '/dna',
     icone: '◎',
@@ -143,10 +143,10 @@ const atalhos = [
 </script>
 
 <template>  
-  <section>
+  <section aria-label="Visão Geral">
     <div class="page-heading">
       <div>
-        <div class="eyebrow">BELMAR STATE / DASHBOARD</div>
+        <div class="eyebrow">INTELIGÊNCIA PATRIMONIAL</div>
 
         <h1>Visão Geral <span class="accent">.</span></h1>
 
@@ -230,9 +230,9 @@ const atalhos = [
       </article>
     </div>
 
+    <EvolucaoPatrimonial />
     <DistribuicaoCarteira />
-<EvolucaoPatrimonial />
-<PainelDividendos />
+    <PainelDividendos />
     <div class="resumo-carteira">
       <span>Fundos na carteira: <strong>{{ posicoes.length }}</strong></span>
       <span>Total de cotas: <strong>{{ totalCotas }}</strong></span>
@@ -257,8 +257,8 @@ const atalhos = [
 
     <div class="section-heading">
       <div>
-        <h2>Minha Carteira</h2>
-        <p>Posições e preços retornados pela API.</p>
+        <h2>Carteira Patrimonial</h2>
+        <p>Suas posições e as últimas cotações disponíveis.</p>
       </div>
 
       <RouterLink to="/carteira" class="text-link">
@@ -333,7 +333,7 @@ const atalhos = [
           <h3>Sua carteira está vazia</h3>
           <p>Registre uma compra para começar a acompanhar suas cotações.</p>
           <RouterLink to="/carteira" class="text-link">
-            Ir para Minha Carteira →
+            Ir para Carteira Patrimonial →
           </RouterLink>
         </div>
       </div>
@@ -371,9 +371,9 @@ const atalhos = [
 
 <style scoped>
 .atualizar-cotacoes {
-  background: #15382e;
-  color: #35e4ae;
-  border: 1px solid #267859;
+  background: var(--bs-action-bg);
+  color: var(--bs-action-text);
+  border: 1px solid var(--bs-action-bg);
   border-radius: 9px;
   padding: 12px 17px;
   font-weight: 700;
@@ -386,7 +386,7 @@ const atalhos = [
 }
 
 .negativo {
-  color: #fb7185;
+  color: var(--bm-negative);
 }
 
 .resumo-carteira {
@@ -394,18 +394,18 @@ const atalhos = [
   flex-wrap: wrap;
   gap: 18px;
   margin-top: 19px;
-  color: #8ea0b8;
+  color: var(--bm-text-secondary);
   font-size: 13px;
 }
 
 .resumo-carteira strong {
-  color: #edf2fb;
+  color: var(--bm-text);
 }
 
 .aviso-mercado {
-  background: #27301d;
-  border: 1px solid #5b6433;
-  color: #e6d5a5;
+  background: var(--bm-warning-bg);
+  border: 1px solid var(--bm-warning-border);
+  color: var(--bm-warning-text);
   padding: 15px;
   border-radius: 10px;
   margin-top: 20px;
@@ -414,7 +414,7 @@ const atalhos = [
 
 .erro-cotacao {
   display: block;
-  color: #fb7185;
+  color: var(--bm-negative);
   margin-top: 4px;
 }
 
