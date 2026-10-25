@@ -7,7 +7,12 @@ require('dotenv').config()
 const { buscarCotacao, buscarHistorico } = require('./services/cotacoes')
 
 const app = express();
+const privado = require('./middleware/privado').criarMiddlewarePrivado()
+app.use(['/auth', '/carteira'], privado)
+app.use('/auth', require('./routes/auth').criarRouterAuth({ sessaoCompartilhada: true }));
+app.use('/carteira', require('./routes/carteira').criarRouterCarteira());
 app.use(cors());
+app.use('/cripto', require('./routes/cripto').criarRouterCripto());
 
 // Catálogo local: não depende da disponibilidade da API de mercado.
 app.get('/buscar', (req, res) => {
@@ -55,7 +60,7 @@ app.get('/historico/:ticker', async (req, res) => {
 })
 
 if (require.main === module) {
-  app.listen(PORT, () => {
+  app.listen(PORT, '127.0.0.1', () => {
     console.log(`Servidor rodando em http://localhost:${PORT}`)
   })
 }

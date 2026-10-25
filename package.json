@@ -5,7 +5,10 @@
   "main": "server.js",
   "scripts": {
     "test": "node --test tests/*.test.js",
-    "start": "node server.js"
+    "start": "node server.js",
+    "db:check": "node scripts/banco.js check",
+    "db:migrate": "node scripts/banco.js migrate",
+    "test:db": "node --test tests/integration/*.test.js"
   },
   "keywords": [],
   "author": "",
@@ -13,6 +16,8 @@
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^18.0.9",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "express-session": "^1.19.0",
+    "pg": "^8.23.1"
   }
 }

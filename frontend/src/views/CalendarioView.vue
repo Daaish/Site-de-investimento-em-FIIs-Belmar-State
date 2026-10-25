@@ -1,5 +1,7 @@
 
 <script setup>
+import { criarArmazenamentoUsuario } from '../composables/armazenamentoUsuario'
+const armazenamento = criarArmazenamentoUsuario()
 import { ref, computed, watch } from 'vue'
 import { useCarteira } from '../composables/useCarteira'
 
@@ -8,7 +10,7 @@ const CHAVE = 'belmar-proventos-v1'
 
 function carregarProventos() {
   try {
-    const dados = JSON.parse(localStorage.getItem(CHAVE) || '[]')
+    const dados = JSON.parse(armazenamento.getItem(CHAVE) || '[]')
     return Array.isArray(dados) ? dados : []
   } catch {
     return []
@@ -176,7 +178,7 @@ const eventosSelecionados = computed(() =>
 )
 
 watch(proventos, dados => {
-  localStorage.setItem(CHAVE, JSON.stringify(dados))
+  armazenamento.setItem(CHAVE, JSON.stringify(dados))
 }, { deep: true })
 
 function mudarMes(direcao) {

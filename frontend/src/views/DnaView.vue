@@ -1,5 +1,7 @@
 
 <script setup>
+import { criarArmazenamentoUsuario } from '../composables/armazenamentoUsuario'
+const armazenamento = criarArmazenamentoUsuario()
 import { ref, computed, watch } from 'vue'
 import { useCarteira } from '../composables/useCarteira'
 
@@ -96,7 +98,7 @@ const perguntas = [
 
 function carregar() {
   try {
-    const dados = JSON.parse(localStorage.getItem(CHAVE) || 'null')
+    const dados = JSON.parse(armazenamento.getItem(CHAVE) || 'null')
 
     if (
       dados &&
@@ -121,7 +123,7 @@ const perguntaAtual = ref(0)
 const resultadoAberto = ref(respostas.value.every(r => r !== null))
 
 watch(respostas, valor => {
-  localStorage.setItem(CHAVE, JSON.stringify({
+  armazenamento.setItem(CHAVE, JSON.stringify({
     respostas: valor,
   }))
 }, { deep: true })

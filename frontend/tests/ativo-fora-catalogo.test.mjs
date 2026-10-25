@@ -2,6 +2,7 @@ import assert from 'node:assert/strict'
 import { test } from 'node:test'
 import { readFileSync } from 'node:fs'
 import { nextTick } from 'vue'
+import { definirUsuarioLocal, criarArmazenamentoUsuario } from '../src/composables/armazenamentoUsuario.js'
 import { useCotacoes } from '../src/composables/useCotacoes.js'
 import { buscarHistoricos, reconstruirHistorico } from '../src/services/reconstruirHistorico.js'
 
@@ -17,9 +18,12 @@ test('VGHF11 ausente do catálogo: operações, posições e séries dos gráfic
   ]
   const storage = new Map([['belmar-carteira-v1', JSON.stringify(operacoes)]])
   globalThis.localStorage = { getItem: key => storage.get(key) ?? null, setItem: (key, value) => storage.set(key, value) }
+  definirUsuarioLocal('00000000-0000-4000-8000-000000000001')
+  criarArmazenamentoUsuario().setItem('belmar-carteira-v1', JSON.stringify(operacoes))
   const chamadas = []
   globalThis.fetch = async url => {
     chamadas.push(url)
+    if (url === '/api/carteira/operacoes') return Response.json({ operacoes })
     if (url === '/api/cotacao/VGHF11') return Response.json({ ticker: 'VGHF11', preco: 12 })
     if (url === '/api/historico/VGHF11') return Response.json({ precos: [
       { data: '2026-01-02', fechamento: 10 }, { data: '2026-01-05', fechamento: 12 },
@@ -30,6 +34,7 @@ test('VGHF11 ausente do catálogo: operações, posições e séries dos gráfic
   try {
     const { useCarteira } = await import('../src/composables/useCarteira.js?fora-catalogo-test')
     const carteira = useCarteira()
+    await carteira.carregar()
     assert.deepEqual(carteira.operacoes.value, operacoes)
     assert.equal(carteira.posicoes.value[0].ticker, 'VGHF11')
     assert.equal(carteira.posicoes.value[0].quantidade, 8)
@@ -42,10 +47,11 @@ test('VGHF11 ausente do catálogo: operações, posições e séries dos gráfic
     const serie = reconstruirHistorico(carteira.operacoes.value, historicos)
     assert.ok(serie.pontos.length > 0)
     assert.equal(serie.pontos.at(-1).mercado, 96)
-    assert.deepEqual(chamadas, ['/api/cotacao/VGHF11', '/api/historico/VGHF11'])
+    assert.deepEqual(chamadas.filter(url => !url.includes('/carteira/')), ['/api/cotacao/VGHF11', '/api/historico/VGHF11'])
     await nextTick()
     assert.equal(storage.get('belmar-carteira-v1'), JSON.stringify(operacoes))
   } finally {
+    definirUsuarioLocal(null)
     delete mercado.cotacoes.VGHF11
     globalThis.fetch = originalFetch
     globalThis.localStorage = originalStorage

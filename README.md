@@ -243,3 +243,130 @@ Projeto desenvolvido para aplicação prática de conhecimentos em desenvolvimen
 - `data/fiis.json` permanece como fallback cadastral. `GET /buscar` preserva seu array com `codigo`, `tipo`, `setor`, `dy: null` e `preco: null`; mantém o filtro `tipo`, e `min_dy` positivo não retorna dados sem DY verificado.
 - `data/indicadores-referencia.json` é exclusivamente legado, com data, período e fonte externa desconhecidos. Não é importado pelos serviços.
 - O catálogo não é uma lista de ativos permitidos: operações, posições, gráficos, cotações e históricos continuam aceitando tickers válidos ausentes do cadastro local, como VGHF11.
+
+### PostgreSQL local — Etapa 1
+
+A Etapa 1 adicionou Docker Compose, conexão Node.js (`pg`) e migrações SQL versionadas. As rotas de mercado continuam funcionando sem conexão com o banco. A autenticação e as tabelas de negócio são descritas na Etapa 2 abaixo; o localStorage permanece inalterado.
+
+Requisitos no WSL: Node.js, Docker com daemon ativo e Docker Compose. Se utilizar Docker Desktop, habilite a integração com sua distribuição WSL.
+
+Na raiz do projeto, prepare a configuração somente se ainda não existir:
+
+```bash
+cp -n .env.postgres.example .env.postgres
+```
+
+Preencha `PGPASSWORD` no arquivo local `.env.postgres` antes de iniciar. Esse arquivo é ignorado pelo Git e separado do `.env` que contém a configuração da brapi. `PGHOST` deve permanecer local. Se a porta 5432 estiver ocupada, escolha outra em `PGPORT`; o Compose e os comandos Node usarão a mesma porta externa.
+
+```bash
+npm ci
+docker compose --env-file .env.postgres up -d --wait postgres
+npm run db:check
+npm run db:migrate
+```
+
+O PostgreSQL 17 fica disponível somente em `127.0.0.1`, com dados persistentes no volume do Compose. O arquivo `001_criar_schema_belmar.sql` cria o schema `belmar`; o executor registra versões e checksums em `public.belmar_migracoes`. Não modifica dados da aplicação.
+
+As migrações são executadas em transação, sob lock para impedir aplicação concorrente. Uma nova execução não repete versões aplicadas. Migrações aplicadas não devem ser editadas, renomeadas ou removidas: crie outro arquivo `002_descricao.sql`, sem comandos `BEGIN`/`COMMIT`, pois o executor controla a transação. Uma divergência de checksum ou erro SQL interrompe e desfaz o lote pendente.
+
+Validação:
+
+```bash
+npm test
+npm run test:db
+```
+
+`npm test` mantém os testes existentes e adiciona verificações unitárias de configuração e migrações. `npm run test:db` é separado e exige o banco ativo: cria um banco temporário com nome aleatório, verifica conexão, idempotência, concorrência, checksum e rollback, e remove somente esse banco ao terminar. O usuário local precisa de permissão de criação de bancos, disponível no serviço demonstrativo criado pelo Compose.
+
+Para parar sem apagar o volume:
+
+```bash
+docker compose --env-file .env.postgres stop postgres
+```
+
+Para iniciar novamente, repita `up -d --wait postgres`. `npm start` continua iniciando o backend na porta 3000, independentemente do banco nesta etapa. Alterar a senha em `.env.postgres` não altera automaticamente a senha de um volume já inicializado; mantenha o arquivo local compatível com o banco existente. Nunca remova o volume para corrigir credenciais sem antes preservar seus dados.
+
+### Autenticação local — Etapa 2 (somente backend)
+
+A migração `002_modelar_usuarios_carteiras_operacoes.sql` acrescenta `belmar.usuarios`, `belmar.carteiras` e `belmar.operacoes`, com chaves estrangeiras e restrições. A migração 001 permanece intacta. O cadastro cria uma carteira inicial na mesma transação. Preços são `NUMERIC` sem arredondamento de escala; as operações têm ordem explícita e identificação opcional da origem para preparar uma futura importação. Nenhuma operação local é importada nesta etapa.
+
+```bash
+docker compose --env-file .env.postgres up -d --wait postgres
+npm ci
+npm run db:migrate
+npm start
+```
+
+O backend inicia em `http://127.0.0.1:3000`. A sessão demonstrativa usa `express-session`, armazenamento em memória e cookie `belmar.sid` HttpOnly, SameSite=Lax, com validade de uma hora. O identificador é renovado no login e invalidado no logout. O cookie não exige HTTPS porque este fluxo é exclusivamente HTTP local. O segredo é gerado aleatoriamente por processo; opcionalmente, `SESSION_SECRET` pode ser fornecido pelo ambiente. Reiniciar o backend encerra sessões; usuários e carteiras continuam no PostgreSQL.
+
+As rotas privadas ficam antes do CORS público das rotas de mercado. Requisições de navegador são aceitas nas origens locais com portas 3000 e 5173 (`localhost` e `127.0.0.1`); o proxy `/api` do Vite mantém as chamadas no mesmo origin. Requisições JSON são limitadas a 8 KB. Senhas têm entre 8 e 128 caracteres e são protegidas com scrypt assíncrono, salt aleatório e comparação segura. Erros de login não distinguem usuário inexistente de senha incorreta; hashes, senhas, SQL e credenciais nunca são retornados.
+
+| Método | Endpoint | Comportamento |
+| --- | --- | --- |
+| POST | `/auth/cadastro` | Nome, e-mail e senha; responde 201 com usuário e carteira. Não inicia sessão automaticamente. |
+| POST | `/auth/login` | E-mail e senha; responde com usuário e cookie. |
+| GET | `/auth/me` | Usuário e carteira da sessão; 401 sem login. IDs na query ou no corpo não mudam o proprietário. |
+| POST | `/auth/logout` | Destrói a sessão e limpa o cookie; responde 204. |
+
+Exemplo local com dados escolhidos por você (substitua os valores antes de executar):
+
+```bash
+curl -i http://127.0.0.1:3000/auth/cadastro \
+  -H 'Content-Type: application/json' \
+  --data '{"nome":"Seu Nome","email":"seu-email@example.com","senha":"SUBSTITUA_POR_SUA_SENHA"}'
+
+curl -i -c /tmp/belmar-cookies.txt http://127.0.0.1:3000/auth/login \
+  -H 'Content-Type: application/json' \
+  --data '{"email":"seu-email@example.com","senha":"SUBSTITUA_POR_SUA_SENHA"}'
+
+curl -i -b /tmp/belmar-cookies.txt http://127.0.0.1:3000/auth/me
+
+curl -i -b /tmp/belmar-cookies.txt -c /tmp/belmar-cookies.txt \
+  -X POST http://127.0.0.1:3000/auth/logout
+```
+
+O jar de cookies é um arquivo local de sessão; não o adicione ao Git. Os comandos acima criam dados apenas quando executados por você. As telas Vue e a proteção das páginas são descritas na Etapa 3 abaixo. A importação explícita dos dados legados e a persistência das operações por API continuam reservadas para uma etapa futura.
+
+Validação:
+
+```bash
+npm test
+npm run test:db
+git diff --check
+```
+
+A suíte PostgreSQL cria e remove somente bancos temporários aleatórios. Cobre cadastro, duplicidade, rollback, hash, login inválido, renovação e persistência de sessão, isolamento entre contas, cookie adulterado, origem externa, limites de corpo e logout. Nenhum teste destrutivo usa o banco principal. A auditoria das quatro dependências preexistentes está em [docs/AUDITORIA_DEPENDENCIAS.md](docs/AUDITORIA_DEPENDENCIAS.md).
+
+### Login e cadastro Vue — Etapa 3
+
+As páginas públicas `/login` e `/cadastro` usam o monograma e os tokens institucionais Light/Dark. `/explorar` continua público. Dashboard, carteira, calendário, perfil e conquistas exigem sessão. A interface consulta `/api/auth/me` ao iniciar, revalida ao navegar para páginas privadas e ao recuperar foco, e usa `credentials: 'include'` em todas as requisições de autenticação.
+
+Fluxo: cadastro com confirmação de senha → login → Dashboard → sair pela sidebar. O cadastro não faz login automático. Usuários já autenticados são redirecionados de login/cadastro para o Dashboard. O nome da sidebar vem da sessão. Envios em andamento ficam bloqueados; erros de credenciais, duplicidade de e-mail e conexão são apresentados sem expor detalhes internos. O logout só é confirmado depois de o backend destruir a sessão.
+
+#### Separação temporária dos dados financeiros
+
+- As chaves globais antigas `belmar-carteira-v1`, `belmar-proventos-v1`, `belmar-dna-v1` e `belmar-historico-patrimonio-v1` nunca são lidas, sobrescritas, apagadas ou importadas pela interface autenticada.
+- Novos registros da demonstração usam `belmar-demo-v1:<id-da-sessao>:<chave-original>`. Uma conta sem registros nesse espaço começa vazia. Não existe associação automática dos dados antigos ao primeiro usuário que entrar.
+- Operações e snapshots compartilhados em memória são recarregados/limpos ao mudar o usuário. As páginas privadas são remontadas na troca de conta, limpando proventos, formulários e respostas do perfil. Callbacks do usuário anterior não podem gravar no espaço do usuário seguinte.
+- O tema e o cache público de mercado permanecem independentes da conta. O catálogo público não é remontado por uma simples troca de usuário.
+- Um evento local sem credenciais avisa outras abas de login/logout; elas revalidam a sessão. Respostas antigas de `/auth/me` são descartadas. Durante a verificação, a apresentação financeira privada fica oculta.
+- Esta é uma separação de apresentação para o protótipo, sem criptografia dos dados do navegador. Não substitui as futuras APIs de carteira com autorização no backend. Os novos registros ainda não são gravados em `belmar.operacoes`.
+
+Para verificar no WSL, mantenha o banco ativo, execute `npm start` na raiz e, em outro terminal:
+
+```bash
+cd frontend
+npm run dev -- --host 127.0.0.1 --port 5173 --strictPort
+```
+
+Abra `http://127.0.0.1:5173/cadastro`. A porta 5173 é importante porque está entre as origens locais permitidas pelo backend. Teste cadastro, login, recarga da página, tema e logout. Entre com duas contas diferentes e confirme que os novos registros de uma não aparecem na outra; os dados legados continuam guardados nas chaves antigas. Não adicione credenciais reais aos arquivos de exemplo ou ao Git.
+
+Testes do frontend, sem dependências adicionais:
+
+```bash
+cd frontend
+node --test --test-isolation=none tests/*.test.mjs
+npm run build
+```
+
+Os testes cobrem os formulários e guardas reais do Vue Router, sessão restaurada, tratamento de erros, isolamento entre contas, callbacks antigos, preservação byte a byte dos valores legados, catálogo público e temas. Não substituem inspeção visual em navegador/mobile.

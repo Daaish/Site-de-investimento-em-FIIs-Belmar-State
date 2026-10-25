@@ -1,11 +1,23 @@
 
 <script setup>
 import { computed, ref, watch } from 'vue'
-import { useTheme } from './composables/useTheme'
+import { useAuth } from './composables/useAuth'
+import ThemeToggle from './components/ThemeToggle.vue'
 import BelmarLogo from './components/BelmarLogo.vue'
-import { RouterLink, RouterView, useRoute } from 'vue-router'
+import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 
-const { isDark, toggleTheme } = useTheme()
+import { useCarteira } from './composables/useCarteira'
+const { carregada: carteiraCarregada, carregando: carteiraCarregando, erro: carteiraErro, carregar: carregarCarteira, temPendente, confirmarPendente, salvando: carteiraSalvando } = useCarteira()
+const auth = useAuth()
+const router = useRouter()
+const { usuario, carregando: authOcupada, verificando, erro: erroAuth } = auth
+const iniciais = computed(() => usuario.value?.nome?.trim().split(/\s+/).slice(0, 2).map(n => n[0]).join('').toUpperCase() || 'BS')
+async function sair() { if (await auth.sair()) await router.replace({ name: 'login' }) }
+watch(verificando, () => {
+  if (verificando.value || !route.name) return
+  if (!usuario.value && !route.meta.publica) router.replace({ name: 'login' })
+  else if (usuario.value && route.meta.somenteVisitante) router.replace({ name: 'dashboard' })
+})
 const menuAberto = ref(false)
 const route = useRoute()
 const secaoAtual = computed(() => menu.find(item => item.rota === route.path)?.nome || 'Plataforma')
@@ -13,6 +25,8 @@ watch(() => route.path, () => { menuAberto.value = false })
 
 const menu = [
   { nome: 'Visão Geral', rota: '/', icone: '◈' },
+  { nome: 'Belmar Academy', rota: '/academy', icone: '▤' },
+  { nome: 'Belmar Digital', rota: '/digital', icone: '◇' },
   { nome: 'Mercado de FIIs', rota: '/explorar', icone: '⌕' },
   { nome: 'Carteira Patrimonial', rota: '/carteira', icone: '▣' },
   { nome: 'Agenda de Proventos', rota: '/calendario', icone: '▦' },
@@ -22,7 +36,8 @@ const menu = [
 </script>
 
 <template>
-  <div class="app-layout" :class="{ 'belmar-dashboard': route.path === '/' }" @keydown.esc="menuAberto = false">
+  <RouterView v-if="route.meta.authPage" :key="route.name" />
+  <div v-else class="app-layout" :class="{ 'belmar-dashboard': route.path === '/' }" @keydown.esc="menuAberto = false">
     <button class="mobile-menu" aria-controls="belmar-navigation" :aria-expanded="menuAberto" :aria-label="menuAberto ? 'Fechar navegação' : 'Abrir navegação'" @click="menuAberto = !menuAberto">
       ☰
     </button>
@@ -54,42 +69,52 @@ const menu = [
 
       <p class="brand-slogan">Patrimônio construído<br>com inteligência.</p>
       <div class="sidebar-bottom">
-        <div class="profile-avatar">IV</div>
+        <div class="profile-avatar">{{ iniciais }}</div>
         <div>
-          <strong>Investidor</strong>
-          <small>Conta demonstrativa</small>
+          <strong>{{ usuario?.nome || 'Visitante' }}</strong>
+          <small>{{ usuario ? 'Conta local demonstrativa' : 'Mercado de FIIs público' }}</small>
         </div>
       </div>
+      <button v-if="usuario" class="logout-button" :disabled="authOcupada" @click="sair">{{ authOcupada ? 'Saindo...' : 'Sair da conta' }}</button>
+      <RouterLink v-else to="/login" class="logout-button">Entrar na plataforma</RouterLink>
+      <p v-if="erroAuth && usuario" class="sidebar-error" role="alert">{{ erroAuth }}</p>
     </aside>
 
     <main class="main-content">
       <header class="topbar">
         <div class="breadcrumb"><span>BELMAR STATE / PLATAFORMA</span><strong>{{ secaoAtual }}</strong></div>
         <div class="topbar-right">
-          <button
-            class="theme-toggle"
-            type="button"
-            :aria-label="isDark ? 'Ativar Belmar Light' : 'Ativar Belmar Dark'"
-            :title="isDark ? 'Ativar Belmar Light' : 'Ativar Belmar Dark'"
-            :aria-pressed="isDark"
-            @click="toggleTheme"
-          >
-            <svg v-if="isDark" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7">
-              <circle cx="12" cy="12" r="4" />
-              <path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5" />
-            </svg>
-            <svg v-else viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7">
-              <path d="M20.5 14.1A9 9 0 0 1 9.9 3.5a9 9 0 1 0 10.6 10.6Z" />
-            </svg>
-          </button>
+          <ThemeToggle />
           <span class="demo-indicator">● Ambiente demonstrativo</span>
-          <div class="top-avatar">IV</div>
+          <div class="top-avatar">{{ iniciais }}</div>
         </div>
       </header>
 
       <div class="page-content">
-        <RouterView />
+        <p v-if="usuario && !route.meta.publica" class="local-data-notice">Ambiente demonstrativo por usuário. Os dados antigos deste navegador estão preservados e não foram importados. Compras e vendas são salvas no PostgreSQL da sua conta. Proventos e perfil continuam neste navegador.</p>
+        <p v-if="verificando && !route.meta.publica" role="status">Verificando sessão...</p>
+        <div v-if="route.meta.publica || usuario" v-show="!verificando || route.meta.publica">
+          <div v-if="!route.meta.publica && !carteiraCarregada" role="status" class="local-data-notice">
+            <template v-if="carteiraCarregando">Carregando sua carteira...</template>
+            <template v-else>{{ carteiraErro || 'Aguardando carregamento da carteira.' }} <button @click="carregarCarteira">Tentar novamente</button></template>
+          </div>
+          <div v-if="!route.meta.publica && carteiraCarregada && (carteiraErro || temPendente)" class="local-data-notice" role="alert">
+            {{ carteiraErro }}
+            <template v-if="temPendente">Existe uma operação aguardando confirmação. <button :disabled="carteiraSalvando" @click="confirmarPendente">Confirmar operação pendente</button></template>
+            <button v-else :disabled="carteiraCarregando || carteiraSalvando" @click="carregarCarteira">Atualizar carteira</button>
+          </div>
+          <RouterView v-if="route.meta.publica || carteiraCarregada" :key="route.meta.publica ? 'publico' : usuario?.id || 'publico'" />
+        </div>
       </div>
     </main>
   </div>
 </template>
+
+<style scoped>
+.logout-button { margin-top: 16px; padding: 11px; background: var(--bm-navy-secondary); color: var(--bm-gold); border: 1px solid var(--bm-sidebar-border); border-radius: 8px; font: inherit; font-size: 12px; text-align: center; }
+.logout-button:disabled { opacity: .6; cursor: not-allowed; }
+.sidebar-error { font-size: 11px; color: var(--bm-sidebar-text); }
+.sidebar-bottom strong { overflow-wrap: anywhere; }
+.sidebar-bottom > div:last-child { min-width: 0; }
+.local-data-notice { background: var(--bm-info-bg); border: 1px solid var(--bm-border); padding: 12px 16px; border-radius: 9px; font-size: 11px; margin: 0 0 24px; color: var(--bm-text); }
+</style>

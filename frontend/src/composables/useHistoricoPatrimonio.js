@@ -1,12 +1,14 @@
 
 import { ref, computed } from 'vue'
+import { criarArmazenamentoUsuario, aoTrocarUsuarioLocal, usuarioLocalAtual } from './armazenamentoUsuario.js'
 
 const CHAVE = 'belmar-historico-patrimonio-v1'
+let armazenamento = criarArmazenamentoUsuario()
 const LIMITE = 730
 
 function carregarHistorico() {
   try {
-    const dados = JSON.parse(localStorage.getItem(CHAVE) || '[]')
+    const dados = JSON.parse(armazenamento.getItem(CHAVE) || '[]')
 
     if (!Array.isArray(dados)) return []
 
@@ -76,7 +78,7 @@ function registrarSnapshot(investido, mercado, referencias = []) {
   const limitado = novos.slice(-LIMITE)
 
   try {
-    localStorage.setItem(CHAVE, JSON.stringify(limitado))
+    armazenamento.setItem(CHAVE, JSON.stringify(limitado))
     historico.value = limitado
     return true
   } catch (erro) {
@@ -93,11 +95,17 @@ const ultimoRegistro = computed(() =>
   historico.value.at(-1) ?? null
 )
 
+aoTrocarUsuarioLocal(() => {
+  armazenamento = criarArmazenamentoUsuario()
+  historico.value = carregarHistorico()
+})
+
 export function useHistoricoPatrimonio() {
+  const dono = usuarioLocalAtual()
   return {
     historico,
     primeiroRegistro,
     ultimoRegistro,
-    registrarSnapshot,
+    registrarSnapshot: (...args) => dono && dono === usuarioLocalAtual() ? registrarSnapshot(...args) : false,
   }
 }
