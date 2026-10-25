@@ -6,6 +6,8 @@ import ThemeToggle from './components/ThemeToggle.vue'
 import BelmarLogo from './components/BelmarLogo.vue'
 import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
 
+import { useCarteira } from './composables/useCarteira'
+const { carregada: carteiraCarregada, carregando: carteiraCarregando, erro: carteiraErro, carregar: carregarCarteira, temPendente, confirmarPendente, salvando: carteiraSalvando } = useCarteira()
 const auth = useAuth()
 const router = useRouter()
 const { usuario, carregando: authOcupada, verificando, erro: erroAuth } = auth
@@ -23,6 +25,7 @@ watch(() => route.path, () => { menuAberto.value = false })
 
 const menu = [
   { nome: 'Visão Geral', rota: '/', icone: '◈' },
+  { nome: 'Belmar Digital', rota: '/digital', icone: '◇' },
   { nome: 'Mercado de FIIs', rota: '/explorar', icone: '⌕' },
   { nome: 'Carteira Patrimonial', rota: '/carteira', icone: '▣' },
   { nome: 'Agenda de Proventos', rota: '/calendario', icone: '▦' },
@@ -87,10 +90,19 @@ const menu = [
       </header>
 
       <div class="page-content">
-        <p v-if="usuario && !route.meta.publica" class="local-data-notice">Ambiente demonstrativo por usuário. Os dados antigos deste navegador estão preservados e não foram importados. Novos registros ficam apenas neste navegador e nesta conta durante a demonstração.</p>
+        <p v-if="usuario && !route.meta.publica" class="local-data-notice">Ambiente demonstrativo por usuário. Os dados antigos deste navegador estão preservados e não foram importados. Compras e vendas são salvas no PostgreSQL da sua conta. Proventos e perfil continuam neste navegador.</p>
         <p v-if="verificando && !route.meta.publica" role="status">Verificando sessão...</p>
         <div v-if="route.meta.publica || usuario" v-show="!verificando || route.meta.publica">
-          <RouterView :key="route.meta.publica ? 'publico' : usuario?.id || 'publico'" />
+          <div v-if="!route.meta.publica && !carteiraCarregada" role="status" class="local-data-notice">
+            <template v-if="carteiraCarregando">Carregando sua carteira...</template>
+            <template v-else>{{ carteiraErro || 'Aguardando carregamento da carteira.' }} <button @click="carregarCarteira">Tentar novamente</button></template>
+          </div>
+          <div v-if="!route.meta.publica && carteiraCarregada && (carteiraErro || temPendente)" class="local-data-notice" role="alert">
+            {{ carteiraErro }}
+            <template v-if="temPendente">Existe uma operação aguardando confirmação. <button :disabled="carteiraSalvando" @click="confirmarPendente">Confirmar operação pendente</button></template>
+            <button v-else :disabled="carteiraCarregando || carteiraSalvando" @click="carregarCarteira">Atualizar carteira</button>
+          </div>
+          <RouterView v-if="route.meta.publica || carteiraCarregada" :key="route.meta.publica ? 'publico' : usuario?.id || 'publico'" />
         </div>
       </div>
     </main>

@@ -7,6 +7,7 @@ import { useCotacoes } from '../composables/useCotacoes'
 // Dados compartilhados com o Dashboard
 const {
   operacoes,
+  adicionarOperacao: persistirOperacao, removerOperacao, salvando, erro: erroCarteira,
   posicoes,
   patrimonio,
   totalCotas,
@@ -129,7 +130,8 @@ const moeda = (valor) =>
     currency: 'BRL',
   })
 
-function adicionarOperacao() {
+async function adicionarOperacao() {
+  if (salvando.value) return
   erro.value = ''
   sucesso.value = ''
 
@@ -176,8 +178,7 @@ function adicionarOperacao() {
     }
   }
 
-  operacoes.value.push({
-    id: crypto.randomUUID(),
+  const confirmou = await persistirOperacao({
     tipo,
     ticker,
     quantidade,
@@ -185,6 +186,7 @@ function adicionarOperacao() {
     data,
   })
 
+  if (!confirmou) return
   sucesso.value = 'Operação registrada com sucesso!'
 
   formulario.value = {
@@ -196,7 +198,8 @@ function adicionarOperacao() {
   }
 }
 
-function desfazerUltima() {
+async function desfazerUltima() {
+  if (salvando.value) return
   if (operacoes.value.length === 0) return
 
   const confirmou = window.confirm(
@@ -205,7 +208,7 @@ function desfazerUltima() {
 
   if (!confirmou) return
 
-  operacoes.value.pop()
+  if (!await removerOperacao(operacoes.value.at(-1).id)) return
   sucesso.value = 'Última operação desfeita.'
   erro.value = ''
 }
@@ -383,8 +386,8 @@ function desfazerUltima() {
             required
           />
 
-          <div v-if="erro" class="mensagem erro">
-            {{ erro }}
+          <div v-if="erro || erroCarteira" class="mensagem erro" role="alert">
+            {{ erro || erroCarteira }}
           </div>
 
           <div v-if="sucesso" class="mensagem sucesso">
@@ -393,9 +396,10 @@ function desfazerUltima() {
 
           <button
             type="submit"
+            :disabled="salvando"
             class="primary-button botao-full"
           >
-            Registrar operação →
+            {{ salvando ? 'Confirmando...' : 'Registrar operação →' }}
           </button>
         </form>
       </div>
@@ -501,6 +505,7 @@ function desfazerUltima() {
         <button
           v-if="operacoes.length"
           class="botao-secundario"
+          :disabled="salvando"
           @click="desfazerUltima"
         >
           Desfazer última

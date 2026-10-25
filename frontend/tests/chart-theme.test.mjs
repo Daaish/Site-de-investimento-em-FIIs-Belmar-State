@@ -97,3 +97,27 @@ test('all chart options and datasets react without resetting filters, modes or y
     }
   } finally { scope.stop() }
 })
+
+test('gráfico de cripto reage ao tema sem trocar seleção, período, pontos ou consultar a API', async () => {
+  const props = vue.reactive({ pontos: [{ tempo: 1000, preco: 2 }], nome: 'Bitcoin' })
+  const source = parseSfc(read('../src/components/GraficoCripto.vue')).descriptor.scriptSetup.content
+  const chart = evaluate(source, { computed: vue.computed, useChartTheme, ChartJS: { register() {} }, defineProps: () => props }, ['dados', 'opcoes'])
+  const scope = vue.effectScope()
+  const { useCripto } = await import('../src/composables/useCripto.js')
+  let chamadas = 0
+  const state = scope.run(() => useCripto({ iniciarRelogio: () => 0, pararRelogio() {}, requisitar: async () => { chamadas++; throw Error('indisponível') } }))
+  state.selecionar({ id: 'bitcoin', nome: 'Bitcoin' }); state.periodo.value = '90'
+  await vue.nextTick()
+  const antes = chamadas
+  try {
+    for (const t of ['light', 'dark', 'light']) {
+      theme.value = t; await vue.nextTick()
+      assert.equal(chart.opcoes.value.scales.y.ticks.color, useChartTheme().value.text)
+      assert.equal(chart.dados.value.datasets[0].borderColor, useChartTheme().value.gold)
+      assert.deepEqual(chart.dados.value.datasets[0].data, [2])
+      assert.equal(state.selecionada.value.id, 'bitcoin')
+      assert.equal(state.periodo.value, '90')
+      assert.equal(chamadas, antes)
+    }
+  } finally { scope.stop() }
+})

@@ -23,6 +23,7 @@ test('VGHF11 ausente do catálogo: operações, posições e séries dos gráfic
   const chamadas = []
   globalThis.fetch = async url => {
     chamadas.push(url)
+    if (url === '/api/carteira/operacoes') return Response.json({ operacoes })
     if (url === '/api/cotacao/VGHF11') return Response.json({ ticker: 'VGHF11', preco: 12 })
     if (url === '/api/historico/VGHF11') return Response.json({ precos: [
       { data: '2026-01-02', fechamento: 10 }, { data: '2026-01-05', fechamento: 12 },
@@ -33,6 +34,7 @@ test('VGHF11 ausente do catálogo: operações, posições e séries dos gráfic
   try {
     const { useCarteira } = await import('../src/composables/useCarteira.js?fora-catalogo-test')
     const carteira = useCarteira()
+    await carteira.carregar()
     assert.deepEqual(carteira.operacoes.value, operacoes)
     assert.equal(carteira.posicoes.value[0].ticker, 'VGHF11')
     assert.equal(carteira.posicoes.value[0].quantidade, 8)
@@ -45,7 +47,7 @@ test('VGHF11 ausente do catálogo: operações, posições e séries dos gráfic
     const serie = reconstruirHistorico(carteira.operacoes.value, historicos)
     assert.ok(serie.pontos.length > 0)
     assert.equal(serie.pontos.at(-1).mercado, 96)
-    assert.deepEqual(chamadas, ['/api/cotacao/VGHF11', '/api/historico/VGHF11'])
+    assert.deepEqual(chamadas.filter(url => !url.includes('/carteira/')), ['/api/cotacao/VGHF11', '/api/historico/VGHF11'])
     await nextTick()
     assert.equal(storage.get('belmar-carteira-v1'), JSON.stringify(operacoes))
   } finally {
