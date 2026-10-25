@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs'
 import { test } from 'node:test'
 import { createRequire } from 'node:module'
 import * as vue from 'vue'
+import { criarArmazenamentoUsuario } from '../src/composables/armazenamentoUsuario.js'
 import { parse as parseSfc } from '@vue/compiler-sfc'
 
 const require = createRequire(import.meta.url)
@@ -42,7 +43,7 @@ test('all chart options and datasets react without resetting filters, modes or y
   let requests = 0
   const operations = vue.ref([{ ticker: 'TEST11', tipo: 'compra', quantidade: 1, preco: 100, data: '2026-01-01' }])
   const dependencies = {
-    ...vue, useChartTheme,
+    ...vue, useChartTheme, criarArmazenamentoUsuario,
     ChartJS: { register() {} },
     useCarteira: () => ({ operacoes: operations, posicoes: vue.ref([]) }),
     useCotacoes: () => ({ cotacoes: {} }),

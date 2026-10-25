@@ -1,5 +1,7 @@
 
 <script setup>
+import { criarArmazenamentoUsuario } from '../composables/armazenamentoUsuario'
+const armazenamento = criarArmazenamentoUsuario()
 import { ref, computed, onMounted } from 'vue'
 import { useCarteira } from '../composables/useCarteira'
 
@@ -10,7 +12,7 @@ const proventos = ref([])
 function carregarProventos() {
   try {
     const dados = JSON.parse(
-      localStorage.getItem('belmar-proventos-v1') || '[]'
+      armazenamento.getItem('belmar-proventos-v1') || '[]'
     )
     proventos.value = Array.isArray(dados) ? dados : []
   } catch {

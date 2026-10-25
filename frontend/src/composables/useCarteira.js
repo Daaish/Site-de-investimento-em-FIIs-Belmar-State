@@ -1,11 +1,14 @@
 
 import { ref, computed, watch } from 'vue'
+import { criarArmazenamentoUsuario, aoTrocarUsuarioLocal } from './armazenamentoUsuario.js'
 
 const CHAVE = 'belmar-carteira-v1'
+let armazenamento = criarArmazenamentoUsuario()
+let trocando = false
 
 function carregar() {
   try {
-    const dados = JSON.parse(localStorage.getItem(CHAVE) || '[]')
+    const dados = JSON.parse(armazenamento.getItem(CHAVE) || '[]')
     return Array.isArray(dados) ? dados : []
   } catch {
     return []
@@ -61,9 +64,16 @@ const totalCotas = computed(() =>
 
 watch(
   operacoes,
-  dados => localStorage.setItem(CHAVE, JSON.stringify(dados)),
-  { deep: true }
+  dados => { if (!trocando) armazenamento.setItem(CHAVE, JSON.stringify(dados)) },
+  { deep: true, flush: 'sync' }
 )
+
+aoTrocarUsuarioLocal(() => {
+  trocando = true
+  armazenamento = criarArmazenamentoUsuario()
+  operacoes.value = carregar()
+  trocando = false
+})
 
 export function useCarteira() {
   return {

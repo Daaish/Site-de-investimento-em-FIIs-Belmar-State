@@ -7,6 +7,7 @@ require('dotenv').config()
 const { buscarCotacao, buscarHistorico } = require('./services/cotacoes')
 
 const app = express();
+app.use('/auth', require('./routes/auth').criarRouterAuth());
 app.use(cors());
 
 // Catálogo local: não depende da disponibilidade da API de mercado.
@@ -55,7 +56,7 @@ app.get('/historico/:ticker', async (req, res) => {
 })
 
 if (require.main === module) {
-  app.listen(PORT, () => {
+  app.listen(PORT, '127.0.0.1', () => {
     console.log(`Servidor rodando em http://localhost:${PORT}`)
   })
 }

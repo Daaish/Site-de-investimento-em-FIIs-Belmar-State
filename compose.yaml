@@ -1,0 +1,21 @@
+name: belmar-state
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: ${PGDATABASE:-belmar}
+      POSTGRES_USER: ${PGUSER:-belmar}
+      POSTGRES_PASSWORD: ${PGPASSWORD:?Defina PGPASSWORD no arquivo .env.postgres}
+    ports:
+      - "127.0.0.1:${PGPORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+    restart: unless-stopped
+volumes:
+  postgres_data:

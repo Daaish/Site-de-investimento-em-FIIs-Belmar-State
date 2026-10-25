@@ -1,5 +1,7 @@
 
 <script setup>
+import { criarArmazenamentoUsuario } from '../composables/armazenamentoUsuario'
+const armazenamento = criarArmazenamentoUsuario()
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { Bar } from 'vue-chartjs'
 import {
@@ -44,7 +46,7 @@ const moeda = valor =>
 
 function carregarProventos() {
   try {
-    const dados = JSON.parse(localStorage.getItem(CHAVE) || '[]')
+    const dados = JSON.parse(armazenamento.getItem(CHAVE) || '[]')
     proventos.value = Array.isArray(dados) ? dados : []
   } catch {
     proventos.value = []
@@ -52,7 +54,7 @@ function carregarProventos() {
 }
 
 function aoAlterarStorage(evento) {
-  if (evento.key === CHAVE || evento.key === null) {
+  if (evento.key === armazenamento.key(CHAVE) || evento.key === null) {
     carregarProventos()
   }
 }

@@ -1,5 +1,9 @@
 
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuth } from '../composables/useAuth'
+import { criarGuardaAuth } from './guardaAuth'
+import LoginView from '../views/LoginView.vue'
+import CadastroView from '../views/CadastroView.vue'
 import DashboardView from '../views/DashboardView.vue'
 import EmConstrucaoView from '../views/EmConstrucaoView.vue'
 import CarteiraView from '../views/CarteiraView.vue'
@@ -11,13 +15,17 @@ import ExplorarView from '../views/ExplorarView.vue'
 const router = createRouter({
   history: createWebHistory(),
   routes: [
+    { path: '/login', name: 'login', component: LoginView, meta: { publica: true, somenteVisitante: true, authPage: true } },
+    { path: '/cadastro', name: 'cadastro', component: CadastroView, meta: { publica: true, somenteVisitante: true, authPage: true } },
     { path: '/', name: 'dashboard', component: DashboardView },
-    { path: '/explorar', name: 'explorar', component: ExplorarView },
+    { path: '/explorar', name: 'explorar', component: ExplorarView, meta: { publica: true } },
     { path: '/carteira', name: 'carteira', component: CarteiraView },
     { path: '/calendario', name: 'calendario', component: CalendarioView },
     { path: '/conquistas', name: 'conquistas', component: ConquistasView },
     { path: '/dna', name: 'dna', component: DnaView },
   ],
 })
+
+router.beforeEach(criarGuardaAuth(useAuth()))
 
 export default router
