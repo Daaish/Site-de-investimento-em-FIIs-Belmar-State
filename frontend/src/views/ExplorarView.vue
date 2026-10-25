@@ -1,119 +1,27 @@
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { onMounted, computed } from 'vue'
 import { RouterLink } from 'vue-router'
+import { useCatalogoFiis } from '../composables/useCatalogoFiis'
 
-const fundos = ref([])
-const carregando = ref(false)
-const erro = ref('')
-
-const pesquisa = ref('')
-const tipo = ref('Todos')
-const dyMinimo = ref(0)
-const ordenacao = ref('ticker')
-
-const moeda = valor =>
-  Number(valor).toLocaleString('pt-BR', {
-    style: 'currency',
-    currency: 'BRL',
-  })
-
-const percentual = valor =>
-  `${Number(valor).toLocaleString('pt-BR', {
-    minimumFractionDigits: 1,
-    maximumFractionDigits: 2,
-  })}%`
-
-async function buscarFundos() {
-  carregando.value = true
-  erro.value = ''
-
-  try {
-    const resposta = await fetch('/api/buscar')
-
-    if (!resposta.ok) {
-      throw new Error(`Erro HTTP ${resposta.status}`)
-    }
-
-    const dados = await resposta.json()
-
-    if (!Array.isArray(dados)) {
-      throw new Error('Formato de resposta inesperado.')
-    }
-
-    fundos.value = dados.map(fii => ({
-      codigo: String(fii.codigo ?? ''),
-      tipo: String(fii.tipo ?? ''),
-      setor: String(fii.setor ?? ''),
-      dy: Number(fii.dy),
-      preco: Number(fii.preco),
-    }))
-  } catch (e) {
-    erro.value = `Não foi possível carregar os FIIs: ${e.message}`
-    fundos.value = []
-  } finally {
-    carregando.value = false
-  }
-}
-
+const { fundos, pesquisa, ordenacao, pagina, paginacao, estado, motivo, consultadoEm,
+  carregando, erro, buscarFundos, limparFiltros, menorPreco } = useCatalogoFiis()
 onMounted(buscarFundos)
-
-const tipos = computed(() => [
-  'Todos',
-  ...new Set(fundos.value.map(f => f.tipo).filter(Boolean)),
-])
-
-const fundosFiltrados = computed(() => {
-  const termo = pesquisa.value.trim().toLowerCase()
-
-  const lista = fundos.value.filter(fii => {
-    const correspondePesquisa =
-      fii.codigo.toLowerCase().includes(termo) ||
-      fii.setor.toLowerCase().includes(termo)
-
-    const correspondeTipo =
-      tipo.value === 'Todos' ||
-      fii.tipo === tipo.value
-
-    const correspondeDY =
-      Number.isFinite(fii.dy) &&
-      fii.dy >= Number(dyMinimo.value)
-
-    return correspondePesquisa &&
-      correspondeTipo &&
-      correspondeDY
-  })
-
-  return lista.sort((a, b) => {
-    if (ordenacao.value === 'dy') return b.dy - a.dy
-    if (ordenacao.value === 'preco-menor') return a.preco - b.preco
-    if (ordenacao.value === 'preco-maior') return b.preco - a.preco
-    return a.codigo.localeCompare(b.codigo)
-  })
+const moeda = valor => Number(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+const aviso = computed(() => {
+  if (estado.value === 'local') {
+    const razoes = { acesso_indisponivel: 'O acesso à fonte está indisponível.', configuracao: 'A fonte está indisponível.', resposta_invalida: 'A fonte não retornou uma listagem válida.', limite_temporario: 'A fonte está temporariamente limitada.' }
+    return `${razoes[motivo.value] || 'A listagem de mercado está indisponível.'} Exibindo somente o cadastro local, sem preços ou indicadores.`
+  }
+  return estado.value === 'desatualizado'
+    ? 'Última listagem disponível: dados desatualizados, mantidos durante uma falha temporária da fonte.'
+    : 'Preços de fechamento informados pela brapi, sujeitos a atraso e ao cache de 15 minutos. A fonte não informa o horário de cada fechamento nesta listagem.'
 })
-
-const dyMedio = computed(() => {
-  const validos = fundos.value.filter(f => Number.isFinite(f.dy))
-
-  if (!validos.length) return 0
-
-  return validos.reduce((s, f) => s + f.dy, 0) / validos.length
+const horarioLista = computed(() => {
+  const data = new Date(consultadoEm.value)
+  return consultadoEm.value && Number.isFinite(data.getTime())
+    ? data.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo', dateStyle: 'short', timeStyle: 'short' }) : null
 })
-
-const menorPreco = computed(() => {
-  const precos = fundos.value
-    .map(f => f.preco)
-    .filter(v => Number.isFinite(v) && v >= 0)
-
-  return precos.length ? Math.min(...precos) : null
-})
-
-function limparFiltros() {
-  pesquisa.value = ''
-  tipo.value = 'Todos'
-  dyMinimo.value = 0
-  ordenacao.value = 'ticker'
-}
 </script>
 
 <template>
@@ -125,7 +33,7 @@ function limparFiltros() {
         <h1>Mercado de FIIs <span class="accent">.</span></h1>
         <p>
           Descubra e compare fundos imobiliários
-          disponíveis em nossa base de dados.
+          com pesquisa e dados de mercado.
         </p>
       </div>
 
@@ -134,39 +42,36 @@ function limparFiltros() {
         :disabled="carregando"
         @click="buscarFundos"
       >
-        ↻ {{ carregando ? 'Carregando...' : 'Atualizar dados' }}
+        ↻ {{ carregando ? 'Atualizando...' : 'Atualizar dados' }}
       </button>
     </div>
 
-    <div class="aviso-base">
+    <div class="aviso-base" :class="{ 'catalogo-limitado': estado === 'local' || estado === 'desatualizado' }" role="status">
       <span>ⓘ</span>
       <div>
-        <strong>Base de demonstração</strong>
-        <p>
-          Informações provenientes do JSON do projeto.
-          Os valores não representam cotações em tempo real.
-          O DY apresentado é o indicador da base, sem atualização automática.
-        </p>
+        <strong>{{ estado === 'local' ? 'Catálogo local limitado' : estado === 'desatualizado' ? 'Catálogo desatualizado' : estado === 'atualizado' ? 'Catálogo atualizado' : 'Catálogo de FIIs' }}</strong>
+        <p>{{ aviso }}</p>
+        <p v-if="horarioLista">Lista consultada em {{ horarioLista }}. Esta é a data de consulta, não do fechamento.</p>
       </div>
     </div>
 
     <div class="stats-explorar">
       <article class="stat-card">
-        <div class="stat-heading">Fundos cadastrados <span>▣</span></div>
-        <h2>{{ fundos.length }}</h2>
-        <p>Disponíveis na base</p>
+        <div class="stat-heading">Fundos encontrados <span>▣</span></div>
+        <h2>{{ paginacao.total }}</h2>
+        <p>Total da pesquisa atual</p>
       </article>
 
       <article class="stat-card">
-        <div class="stat-heading">DY médio da base <span>↗</span></div>
-        <h2 class="positive">{{ percentual(dyMedio) }}</h2>
-        <p>Média simples dos fundos cadastrados</p>
+        <div class="stat-heading">Dividend Yield médio <span>↗</span></div>
+        <h2>—</h2>
+        <p>Indisponível: sem fonte verificada</p>
       </article>
 
       <article class="stat-card">
-        <div class="stat-heading">Menor preço cadastrado <span>◈</span></div>
+        <div class="stat-heading">Menor fechamento desta página <span>◈</span></div>
         <h2>{{ menorPreco === null ? '—' : moeda(menorPreco) }}</h2>
-        <p>Não indica fundo mais barato em valuation</p>
+        <p>{{ estado === 'desatualizado' ? 'Listagem desatualizada.' : 'Considera somente os resultados desta página.' }}</p>
       </article>
     </div>
 
@@ -187,44 +92,44 @@ function limparFiltros() {
           <label for="pesquisa">Pesquisar</label>
           <input
             id="pesquisa"
+            maxlength="100"
             v-model="pesquisa"
             type="search"
-            placeholder="Ticker ou setor..."
+            placeholder="Ticker ou nome..."
           />
         </div>
 
         <div class="campo">
           <label for="tipo">Tipo</label>
-          <select id="tipo" v-model="tipo">
-            <option
-              v-for="opcao in tipos"
-              :key="opcao"
-              :value="opcao"
-            >
-              {{ opcao }}
-            </option>
-          </select>
+          <select id="tipo" disabled aria-describedby="tipo-indisponivel"><option>Todos os FIIs</option></select>
+          <small id="tipo-indisponivel" class="ajuda-filtro">Papel/Tijolo indisponível: a listagem não fornece essa classificação.</small>
         </div>
 
         <div class="campo">
           <label for="dy">DY mínimo (%)</label>
           <input
             id="dy"
-            v-model.number="dyMinimo"
+            value="0"
             type="number"
             min="0"
             max="100"
             step="0.5"
+            disabled
+            aria-describedby="dy-indisponivel"
           />
+          <small id="dy-indisponivel" class="ajuda-filtro">DY e ordenação por DY indisponíveis: sem fonte verificada.</small>
         </div>
 
         <div class="campo">
           <label for="ordenacao">Ordenar por</label>
-          <select id="ordenacao" v-model="ordenacao">
-            <option value="ticker">Ticker (A–Z)</option>
-            <option value="dy">Maior DY</option>
-            <option value="preco-menor">Menor preço</option>
-            <option value="preco-maior">Maior preço</option>
+          <select id="ordenacao" v-model="ordenacao" aria-describedby="dy-indisponivel">
+            <option value="nome">Nome (A–Z)</option>
+            <option value="nome-desc">Nome (Z–A)</option>
+            <option value="volume" :disabled="estado === 'local'">Maior volume</option>
+            <option value="variacao" :disabled="estado === 'local'">Maior variação</option>
+            <option value="dy" disabled>Maior DY (indisponível)</option>
+            <option value="preco-menor" :disabled="estado === 'local'">Menor preço</option>
+            <option value="preco-maior" :disabled="estado === 'local'">Maior preço</option>
           </select>
         </div>
       </div>
@@ -233,11 +138,13 @@ function limparFiltros() {
     <div class="resultados-topo">
       <div>
         <h2>Fundos encontrados</h2>
-        <p>{{ fundosFiltrados.length }} resultado(s)</p>
+        <p>{{ fundos.length }} nesta página · {{ paginacao.total }} resultado(s)</p>
       </div>
     </div>
 
-    <div v-if="erro" class="mensagem-erro">
+    <p v-if="erro && fundos.length" class="aviso-atualizacao" role="status">{{ erro }}</p>
+    <p v-if="carregando && fundos.length" class="aviso-atualizacao" role="status">Consultando catálogo; pesquisa e filtros continuam disponíveis.</p>
+    <div v-if="erro && !fundos.length" class="mensagem-erro">
       <p>{{ erro }}</p>
       <button @click="buscarFundos">Tentar novamente</button>
     </div>
@@ -246,7 +153,7 @@ function limparFiltros() {
       Carregando fundos imobiliários...
     </div>
 
-    <div v-else-if="!fundosFiltrados.length" class="estado-vazio">
+    <div v-else-if="!fundos.length" class="estado-vazio">
       <div class="icone-vazio">⌕</div>
       <h3>Nenhum fundo encontrado</h3>
       <p>Experimente alterar os filtros de pesquisa.</p>
@@ -254,7 +161,7 @@ function limparFiltros() {
 
     <div v-else class="grade-fundos">
       <article
-        v-for="fii in fundosFiltrados"
+        v-for="fii in fundos"
         :key="fii.codigo"
         class="fundo-card"
       >
@@ -265,38 +172,46 @@ function limparFiltros() {
 
           <div class="fundo-identificacao">
             <h3>{{ fii.codigo }}</h3>
-            <span>{{ fii.setor }}</span>
+            <span>{{ fii.nome }}</span>
+            <small v-if="fii.setor">Setor informado: {{ fii.setor }}</small>
           </div>
 
-          <span class="tipo-badge">{{ fii.tipo }}</span>
+          <span class="tipo-badge">{{ estado === 'local' ? fii.tipo : 'FII' }}</span>
         </div>
 
         <div class="fundo-indicadores">
           <div>
-            <span>Preço de referência</span>
-            <strong>
-              {{ Number.isFinite(fii.preco) ? moeda(fii.preco) : '—' }}
-            </strong>
+            <span>Fechamento informado pela brapi</span>
+            <strong>{{ fii.preco === null ? 'Indisponível' : moeda(fii.preco) }}</strong>
+            <span class="cotacao-status" :class="{ desatualizada: estado === 'desatualizado', indisponivel: fii.preco === null }">
+              {{ fii.preco === null ? '— Sem preço disponível' : estado === 'desatualizado' ? '◷ Listagem desatualizada' : '● Listagem dentro do prazo de cache' }}
+            </span>
           </div>
 
           <div>
             <span>Dividend Yield</span>
-            <strong class="positive">
-              {{ Number.isFinite(fii.dy) ? percentual(fii.dy) : '—' }}
-            </strong>
+            <strong>—</strong>
+            <small class="referencia-cotacao">Sem fonte verificada</small>
           </div>
+          <div><span>P/VP</span><strong>—</strong><small class="referencia-cotacao">Indisponível nesta fonte</small></div>
         </div>
 
         <div class="fundo-rodape">
-          <span>Informações da base local</span>
+          <span>{{ estado === 'local' ? 'Cadastro local limitado' : 'Listagem brapi.dev' }}</span>
 
           <RouterLink to="/carteira" class="link-carteira">
-            Minha Carteira →
+            Carteira Patrimonial →
           </RouterLink>
         </div>
       </article>
     </div>
 
+    <nav class="paginacao-catalogo" aria-label="Páginas de FIIs">
+      <button class="limpar" :disabled="carregando || pagina <= 1" @click="pagina--">← Anterior</button>
+      <span>Página {{ pagina }} de {{ Math.max(1, paginacao.totalPages) }}</span>
+      <button class="limpar" :disabled="carregando || !paginacao.hasNextPage" @click="pagina++">Próxima →</button>
+    </nav>
+    <p v-if="estado === 'local'" class="ajuda-filtro">Ordenação por preço, volume e variação indisponível neste modo; resultados locais em ordem alfabética.</p>
     <p class="aviso-rodape">
       Os indicadores são informativos, não constituem recomendação
       de investimento. Dividend Yield histórico não garante
@@ -528,4 +443,15 @@ function limparFiltros() {
   .fundo-identificacao { flex-basis: 120px; }
   .filtros-titulo { flex-direction: column; align-items: flex-start; }
 }
+
+.ajuda-filtro, .referencia-cotacao, .aviso-atualizacao { font-size: 11px; color: var(--bm-text-secondary); line-height: 1.6; }
+.campo input:disabled { cursor: not-allowed; background: var(--bm-surface-muted); }
+.fundo-indicadores .cotacao-status { font-size: 10px; padding: 4px 7px; border-radius: 6px; background: var(--bm-info-bg); color: var(--bm-text); }
+.fundo-indicadores .cotacao-status.desatualizada { background: var(--bm-warning-bg); color: var(--bm-warning-text); border: 1px solid var(--bm-warning-border); }
+.fundo-indicadores .cotacao-status.indisponivel { background: var(--bm-surface-muted); color: var(--bm-text-secondary); }
+
+.catalogo-limitado { background: var(--bm-warning-bg); border-color: var(--bm-warning-border); }
+.paginacao-catalogo { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-top: 24px; font-size: 13px; }
+.paginacao-catalogo button:disabled { opacity: .5; cursor: not-allowed; }
+.fundo-identificacao small { display: block; font-size: 10px; color: var(--bm-text-secondary); overflow-wrap: anywhere; }
 </style>

@@ -1,0 +1,34 @@
+[
+  {
+    "codigo": "HGLG11",
+    "dy": 8.2,
+    "classificacao": "referencia-legada",
+    "data": null,
+    "periodo": null,
+    "fonteExterna": null
+  },
+  {
+    "codigo": "KNRI11",
+    "dy": 7.5,
+    "classificacao": "referencia-legada",
+    "data": null,
+    "periodo": null,
+    "fonteExterna": null
+  },
+  {
+    "codigo": "MXRF11",
+    "dy": 11.3,
+    "classificacao": "referencia-legada",
+    "data": null,
+    "periodo": null,
+    "fonteExterna": null
+  },
+  {
+    "codigo": "VISC11",
+    "dy": 9.0,
+    "classificacao": "referencia-legada",
+    "data": null,
+    "periodo": null,
+    "fonteExterna": null
+  }
+]

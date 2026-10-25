@@ -231,3 +231,15 @@ Projeto desenvolvido para aplicação prática de conhecimentos em desenvolvimen
 ---
 
 **Belmar State — Acompanhe seu patrimônio. Explore sua evolução.**
+
+### Catálogo dinâmico e fontes de mercado
+
+- `GET /fiis` consulta `/api/quote/list` com `subType=fii`. Aceita `page` (inicial 1), `limit` (inicial 20, máximo 50), `search` (ticker/nome, até 100 caracteres), `sortBy` (`name`, `close`, `volume`, `change`) e `sortOrder` (`asc`, `desc`). Retorna `itens`, `paginacao`, `origem`, `estado`, `motivo`, `consultadoEm`, `cacheStatus` e `desatualizado`.
+- A listagem usa a mesma instância do cache e cliente de cotações/históricos: TTL de 15 minutos, stale temporário até 24 horas, deduplicação e cooldown 429 compartilhados. Cada combinação normalizada de parâmetros possui uma chave própria, sob o limite global de 500 entradas. Não há chamadas individuais por card nem preenchimento do cache de cotações a partir da listagem.
+- A página carrega somente uma página por consulta. Pesquisa e ordenação aguardam 400 ms, reiniciam a página e descartam respostas ultrapassadas. Atualizar mantém pesquisa, ordenação e página, corrigindo páginas que deixaram de existir.
+- Os preços são fechamentos informados pela brapi. `atualizadoEm` permanece nulo quando não há data da fonte; `consultadoEm` registra somente a consulta bem-sucedida da listagem, não o horário do preço. Ausências nunca viram zero. O menor fechamento refere-se somente à página exibida.
+- DY, P/VP e classificação Papel/Tijolo não são inferidos. Seus controles ficam indisponíveis até existir uma fonte adequada. `sector` é mostrado como setor informado pela API, sem conversão para segmento de FII.
+- Os estados são `atualizado` (fonte ou cache válido), `desatualizado` (stale permitido durante falha temporária) e `local` (cadastro limitado, sem preços). Falhas de autenticação e respostas inválidas não usam dados financeiros antigos: mostram fallback local e motivo explícito. Parâmetros inválidos retornam HTTP 400 sem consultar a fonte.
+- `data/fiis.json` permanece como fallback cadastral. `GET /buscar` preserva seu array com `codigo`, `tipo`, `setor`, `dy: null` e `preco: null`; mantém o filtro `tipo`, e `min_dy` positivo não retorna dados sem DY verificado.
+- `data/indicadores-referencia.json` é exclusivamente legado, com data, período e fonte externa desconhecidos. Não é importado pelos serviços.
+- O catálogo não é uma lista de ativos permitidos: operações, posições, gráficos, cotações e históricos continuam aceitando tickers válidos ausentes do cadastro local, como VGHF11.

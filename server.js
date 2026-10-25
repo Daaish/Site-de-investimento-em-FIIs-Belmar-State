@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const fs = require('fs');
-const path = require('node:path');
+const { buscarFiis, consultarCatalogo } = require('./services/fiis')
 
 require('dotenv').config()
 
@@ -10,29 +9,18 @@ const { buscarCotacao, buscarHistorico } = require('./services/cotacoes')
 const app = express();
 app.use(cors());
 
-// Lê os dados do arquivo JSON
-const dados = JSON.parse(
-  fs.readFileSync(path.join(__dirname, 'a0cd551e-ae8e-4657-b557-3a64020a14de.json'), 'utf8')
-);
-
-// Rota de busca com filtros
+// Catálogo local: não depende da disponibilidade da API de mercado.
 app.get('/buscar', (req, res) => {
-  let { tipo, min_dy } = req.query;
-  let filtrados = dados;
-
-  if (tipo) {
-    filtrados = filtrados.filter(fii =>
-      fii.tipo.toLowerCase().includes(tipo.toLowerCase())
-    );
+  try {
+    return res.json(buscarFiis(req.query))
+  } catch (erro) {
+    return res.status(400).json({ erro: erro.message })
   }
+});
 
-  if (min_dy) {
-    filtrados = filtrados.filter(fii =>
-      fii.dy >= parseFloat(min_dy)
-    );
-  }
-
-  res.json(filtrados);
+app.get('/fiis', async (req, res) => {
+  try { return res.json(await consultarCatalogo(req.query)) }
+  catch { return res.status(400).json({ erro: 'Parâmetros de catálogo inválidos' }) }
 });
 
 // Inicia servidor local
