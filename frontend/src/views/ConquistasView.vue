@@ -133,7 +133,7 @@ function valorAtual(conquista) {
 <template>
   <section class="conquistas-page">
     <div class="eyebrow">BELMAR STATE / GAMIFICAÇÃO</div>
-    <h1>Suas Conquistas <span class="accent">.</span></h1>
+    <h1>Jornada do Investidor <span class="accent">.</span></h1>
     <p>
       Acompanhe seu progresso, complete desafios
       e evolua sua jornada na plataforma.
@@ -173,7 +173,7 @@ function valorAtual(conquista) {
 
       <article class="stat-card">
         <div class="stat-heading">Conclusão <span>◎</span></div>
-        <h2 class="positive">{{ percentualConquistas }}%</h2>
+        <h2>{{ percentualConquistas }}%</h2>
         <p>Seu progresso geral</p>
       </article>
     </div>
@@ -245,8 +245,8 @@ function valorAtual(conquista) {
   display: flex;
   align-items: center;
   gap: 32px;
-  background: linear-gradient(120deg, #153c34, #101a2a 70%);
-  border: 1px solid #25674f;
+  background: var(--bm-surface);
+  border: 1px solid var(--bm-border);
   border-radius: 16px;
   padding: 32px;
   margin: 30px 0 22px;
@@ -254,8 +254,8 @@ function valorAtual(conquista) {
 
 .nivel-medalha {
   font-size: 70px;
-  background: #1c4439;
-  border: 1px solid #34745c;
+  background: var(--bm-gold-bg);
+  border: 1px solid var(--bm-warning-border);
   border-radius: 50%;
   width: 115px;
   height: 115px;
@@ -265,20 +265,20 @@ function valorAtual(conquista) {
 }
 
 .nivel-info { flex: 1; min-width: 0; }
-.nivel-label { color: #26dba4; font-size: 11px; letter-spacing: 2px; }
+.nivel-label { color: var(--bm-gold-text); font-size: 11px; letter-spacing: 2px; }
 .nivel-info h2 { margin: 8px 0; font-size: 27px; }
 .nivel-info p { margin: 0 0 18px; font-size: 13px; }
 
 .barra-progresso {
   height: 9px;
-  background: #29374b;
+  background: var(--bm-border);
   border-radius: 20px;
   overflow: hidden;
 }
 
 .barra-progresso > div {
   height: 100%;
-  background: linear-gradient(90deg, #13b886, #5bf4c3);
+  background: var(--bm-gold);
   border-radius: 20px;
   transition: width .4s ease;
 }
@@ -288,7 +288,7 @@ function valorAtual(conquista) {
   justify-content: space-between;
   margin-top: 9px;
   font-size: 12px;
-  color: #a5b6c8;
+  color: var(--bm-text-secondary);
 }
 
 .resumo-conquistas {
@@ -304,17 +304,18 @@ function valorAtual(conquista) {
 }
 
 .conquista-card {
-  background: #101a2a;
-  border: 1px solid #27354a;
+  background: var(--bm-surface);
+  border: 1px solid var(--bm-border);
   border-radius: 15px;
   padding: 24px;
   transition: .2s;
 }
 
-.conquista-card:hover { transform: translateY(-3px); }
-.conquista-card.desbloqueada { border-color: #237c60; }
+.conquista-card:hover { border-color: var(--bm-input-border); }
+.conquista-card.desbloqueada { border-color: var(--bm-gold); }
 
 .conquista-topo, .conquista-rodape, .progresso-labels {
+  flex-wrap: wrap;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -323,18 +324,18 @@ function valorAtual(conquista) {
 
 .categoria {
   font-size: 11px;
-  color: #94a6be;
+  color: var(--bm-text-secondary);
 }
 
 .estado {
   font-size: 10px;
   border-radius: 20px;
-  color: #9caabe;
-  background: #263449;
+  color: var(--bm-text-secondary);
+  background: var(--bm-surface-muted);
   padding: 6px 9px;
 }
 
-.estado.concluida { background: #184635; color: #4df1b8; }
+.estado.concluida { background: var(--bm-gold-bg); color: var(--bm-gold-text); }
 
 .conquista-icone {
   font-size: 48px;
@@ -352,15 +353,15 @@ function valorAtual(conquista) {
 .conquista-progresso { margin: 25px 0; }
 
 .progresso-labels {
-  color: #a5b6c8;
+  color: var(--bm-text-secondary);
   font-size: 11px;
   margin-bottom: 10px;
 }
 
 .conquista-rodape {
-  border-top: 1px solid #29374b;
+  border-top: 1px solid var(--bm-border);
   padding-top: 17px;
-  color: #24dba5;
+  color: var(--bm-text);
   font-size: 12px;
   font-weight: 700;
 }
@@ -368,6 +369,7 @@ function valorAtual(conquista) {
 .aviso-conquistas { font-size: 12px; margin-top: 25px; }
 
 @media (max-width: 1100px) {
+  .resumo-conquistas { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .grade-conquistas { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 

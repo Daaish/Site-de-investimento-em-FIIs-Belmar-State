@@ -1,0 +1,39 @@
+/* Brand primitives stay stable; semantic tokens can be overridden by a future theme. */
+:root {
+  --bm-navy: #0B1525;
+  --bm-navy-secondary: #162337;
+  --bm-gold: #C5A46D;
+  --bm-background: #F6F7F9;
+  --bm-surface: #FFFFFF;
+  --bm-surface-muted: #F8FAFC;
+  --bm-text: #142238;
+  --bm-text-secondary: #63758C;
+  --bm-text-on-background: #596C83;
+  --bm-border: #E1E6ED;
+  --bm-positive: #168563;
+  --bm-negative: #C44E55;
+  --bm-positive-bg: #EAF5F0;
+  --bm-negative-bg: #FBEFF0;
+  --bm-info-bg: #EDF2F8;
+  --bm-gold-bg: #F6F0E5;
+  --bm-gold-text: #795D2E;
+  --bm-input-border: #8190A4;
+  --bm-sidebar-text: #B8C4D4;
+  --bm-sidebar-border: #344053;
+  --bm-profile-growth: #526F94;
+  --bm-profile-stability: #727B8C;
+  --bm-warning-bg: #FAF6EE;
+  --bm-warning-text: #795D2E;
+  --bm-warning-border: #E6D8BE;
+  --bm-font-heading: 'Manrope', sans-serif;
+  --bm-font-interface: 'Inter', sans-serif;
+  --bm-radius: 12px;
+  --bm-shadow: 0 2px 8px rgb(11 21 37 / 3%);
+  --bm-space-1: 4px;
+  --bm-space-2: 8px;
+  --bm-space-3: 12px;
+  --bm-space-4: 16px;
+  --bm-space-6: 24px;
+  --bm-space-8: 32px;
+  --bm-sidebar-width: 272px;
+}

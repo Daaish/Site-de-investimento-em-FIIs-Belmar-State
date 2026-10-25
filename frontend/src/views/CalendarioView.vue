@@ -268,7 +268,7 @@ const diasSemana = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']
   <section class="calendario-page">
     <div class="eyebrow">BELMAR STATE / PROVENTOS</div>
 
-    <h1>Calendário Inteligente <span class="accent">.</span></h1>
+    <h1>Agenda de Proventos <span class="accent">.</span></h1>
 
     <p>
       Acompanhe os rendimentos dos seus FIIs e descubra
@@ -519,9 +519,9 @@ const diasSemana = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']
 }
 
 .painel {
-  background: #101a2a;
-  border: 1px solid #223047;
-  border-radius: 14px;
+  background: var(--bm-surface);
+  border: 1px solid var(--bm-border);
+  border-radius: var(--bm-radius);
   padding: 24px;
   min-width: 0;
 }
@@ -537,28 +537,28 @@ const diasSemana = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']
 }
 
 .calendario-topo h2 { text-transform: capitalize; }
-.calendario-topo span { color: #8491a8; font-size: 12px; }
+.calendario-topo span { color: var(--bm-text-secondary); font-size: 12px; }
 
 .navegacao-mes { display: flex; gap: 8px; }
 
 .navegacao-mes button {
   width: 35px;
   height: 35px;
-  border: 1px solid #304057;
+  border: 1px solid var(--bm-input-border);
   border-radius: 8px;
-  background: #19283c;
-  color: #fff;
+  background: var(--bm-navy-secondary);
+  color: var(--bm-surface);
   font-size: 25px;
   cursor: pointer;
 }
 
-.navegacao-mes button:hover { border-color: #20d69f; }
+.navegacao-mes button:hover { border-color: var(--bm-navy-secondary); }
 
 .legenda {
   display: flex;
   gap: 18px;
   margin: 24px 0 15px;
-  color: #a3b1c5;
+  color: var(--bm-text-secondary);
   font-size: 12px;
 }
 
@@ -569,8 +569,8 @@ const diasSemana = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']
   border-radius: 50%;
 }
 
-.ponto.confirmado, .marcador.confirmado { background: #20d69f; }
-.ponto.estimado, .marcador.estimado { background: #e7b86c; }
+.ponto.confirmado, .marcador.confirmado { background: var(--bm-positive); }
+.ponto.estimado, .marcador.estimado { background: var(--bm-gold); }
 
 .grade-calendario {
   display: grid;
@@ -581,7 +581,7 @@ const diasSemana = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']
 .dia-semana {
   text-align: center;
   padding: 12px 0;
-  color: #8292ab;
+  color: var(--bm-text-secondary);
   font-size: 12px;
   font-weight: 700;
 }
@@ -589,38 +589,38 @@ const diasSemana = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']
 .dia-calendario {
   min-width: 0;
   min-height: 88px;
-  border: 1px solid #26354a;
-  background: #0d1625;
+  border: 1px solid var(--bm-border);
+  background: var(--bm-surface);
   border-radius: 8px;
   padding: 9px;
   overflow: hidden;
 }
 
 .dia-calendario.clicavel { cursor: pointer; }
-.dia-calendario.clicavel:hover { border-color: #20d69f; }
+.dia-calendario.clicavel:hover { border-color: var(--bm-navy-secondary); }
 .dia-calendario.vazio { background: transparent; border-color: transparent; }
-.dia-calendario.hoje { border-color: #20d69f; }
-.dia-calendario.selecionado { background: #163b32; border-color: #20d69f; }
+.dia-calendario.hoje { border-color: var(--bm-gold); }
+.dia-calendario.selecionado { background: var(--bm-info-bg); border-color: var(--bm-navy-secondary); }
 
 .numero-dia { font-size: 13px; font-weight: 600; }
 .indicadores-dia { display: flex; gap: 3px; flex-wrap: wrap; margin: 10px 0 5px; }
-.dia-calendario small { font-size: 10px; color: #36dfa9; overflow-wrap: anywhere; }
+.dia-calendario small { font-size: 10px; color: var(--bm-positive); overflow-wrap: anywhere; }
 
 form { display: flex; flex-direction: column; gap: 10px; }
-label { font-size: 12px; color: #aab8cc; margin-top: 7px; }
+label { font-size: 12px; color: var(--bm-text-secondary); margin-top: 7px; }
 
 input, select {
   width: 100%;
+  min-width: 0;
   padding: 12px;
-  border: 1px solid #314158;
-  background: #0a1120;
-  color: #f0f5fc;
+  border: 1px solid var(--bm-input-border);
+  background: var(--bm-surface);
+  color: var(--bm-text);
   border-radius: 8px;
   font: inherit;
-  outline: none;
 }
 
-input:focus, select:focus { border-color: #20d69f; }
+input:focus, select:focus { border-color: var(--bm-navy-secondary); }
 .botao-full { width: 100%; border: 0; margin-top: 14px; cursor: pointer; }
 
 .lista-eventos { margin-top: 24px; }
@@ -628,31 +628,31 @@ input:focus, select:focus { border-color: #20d69f; }
 
 .botao-secundario {
   background: transparent;
-  border: 1px solid #405066;
-  color: #b7c6d8;
+  border: 1px solid var(--bm-input-border);
+  color: var(--bm-text);
   border-radius: 8px;
   padding: 10px;
   cursor: pointer;
 }
 
 .status { font-size: 11px; border-radius: 6px; padding: 5px 8px; }
-.status.confirmado { background: #153c30; color: #32dfa7; }
-.status.estimado { background: #473a24; color: #f0c17c; }
+.status.confirmado { background: var(--bm-info-bg); color: var(--bm-text); }
+.status.estimado { background: var(--bm-gold-bg); color: var(--bm-gold-text); }
 
 .excluir {
   background: transparent;
   border: 0;
-  color: #f09b9b;
+  color: var(--bm-text-secondary);
   font-size: 24px;
   cursor: pointer;
 }
 
 .alerta { padding: 10px; border-radius: 8px; font-size: 12px; }
-.erro { background: #40232b; color: #ffaaaa; }
-.sucesso { background: #15382d; color: #4aebba; }
+.erro { background: var(--bm-warning-bg); color: var(--bm-warning-text); }
+.sucesso { background: var(--bm-info-bg); color: var(--bm-text); }
 
-.estado-vazio { text-align: center; padding: 45px 12px; color: #8796ac; }
-.estado-vazio div { font-size: 40px; color: #20d69f; }
+.estado-vazio { text-align: center; padding: 45px 12px; color: var(--bm-text-secondary); }
+.estado-vazio div { font-size: 40px; color: var(--bm-navy-secondary); }
 .estado-vazio h3 { margin: 12px 0 0; }
 .aviso-dados { font-size: 12px; margin-top: 20px; }
 

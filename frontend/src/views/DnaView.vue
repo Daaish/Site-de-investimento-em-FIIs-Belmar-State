@@ -218,7 +218,7 @@ function refazer() {
   <section class="dna-page">
     <div class="eyebrow">BELMAR STATE / PERSONALIZAÇÃO</div>
 
-    <h1>DNA do Investidor <span class="accent">.</span></h1>
+    <h1>Perfil do Investidor <span class="accent">.</span></h1>
     <p>
       Descubra quais características mais combinam com sua
       forma de acompanhar investimentos.
@@ -318,7 +318,7 @@ function refazer() {
               <div
                 :style="{
                   width: item.percentual + '%',
-                  background: item.cor,
+                  background: 'var(--bm-profile-' + item.id + ')',
                 }"
               ></div>
             </div>
@@ -368,11 +368,18 @@ function refazer() {
 </template>
 
 <style scoped>
+.dna-page {
+  --bm-profile-renda: var(--bm-navy-secondary);
+  --bm-profile-crescimento: var(--bm-profile-growth);
+  --bm-profile-estabilidade: var(--bm-profile-stability);
+  --bm-profile-exploracao: var(--bm-gold);
+}
+
 .questionario {
   max-width: 800px;
   margin: 34px auto;
-  background: #101a2a;
-  border: 1px solid #263750;
+  background: var(--bm-surface);
+  border: 1px solid var(--bm-border);
   border-radius: 18px;
   padding: 32px;
 }
@@ -382,21 +389,21 @@ function refazer() {
   justify-content: space-between;
   gap: 12px;
   font-size: 11px;
-  color: #92a4ba;
+  color: var(--bm-text-secondary);
   letter-spacing: 1px;
   margin-bottom: 15px;
 }
 
 .barra {
   height: 9px;
-  background: #26364b;
+  background: var(--bm-border);
   border-radius: 20px;
   overflow: hidden;
 }
 
 .barra > div {
   height: 100%;
-  background: #20d69f;
+  background: var(--bm-navy-secondary);
   border-radius: 20px;
   transition: width .3s ease;
 }
@@ -427,33 +434,33 @@ function refazer() {
   align-items: center;
   gap: 16px;
   padding: 18px;
-  background: #0b1423;
-  border: 1px solid #304057;
+  background: var(--bm-surface-muted);
+  border: 1px solid var(--bm-input-border);
   border-radius: 11px;
-  color: #d8e3f2;
+  color: var(--bm-text);
   text-align: left;
   cursor: pointer;
   transition: .2s;
 }
 
-.opcao:hover { border-color: #22c997; }
+.opcao:hover { border-color: var(--bm-navy-secondary); }
 
 .opcao.selecionada {
-  background: #143b30;
-  border-color: #21d69f;
+  background: var(--bm-info-bg);
+  border-color: var(--bm-navy-secondary);
 }
 
 .letra {
-  background: #203046;
+  background: var(--bm-surface-muted);
   padding: 9px 13px;
   border-radius: 8px;
-  color: #aabacf;
+  color: var(--bm-text);
   font-weight: 700;
 }
 
 .check {
   margin-left: auto;
-  color: #27daa4;
+  color: var(--bm-navy-secondary);
   font-size: 22px;
 }
 
@@ -477,9 +484,9 @@ function refazer() {
 }
 
 .botao-secundario {
-  color: #b4c4d7;
+  color: var(--bm-text);
   background: transparent;
-  border: 1px solid #405066;
+  border: 1px solid var(--bm-input-border);
   border-radius: 9px;
   padding: 12px 20px;
   cursor: pointer;
@@ -489,12 +496,8 @@ function refazer() {
   text-align: center;
   padding: 45px 24px;
   margin-top: 30px;
-  background: radial-gradient(
-    ellipse at top,
-    #164636 0%,
-    #101a2a 70%
-  );
-  border: 1px solid #25664e;
+  background: var(--bm-surface);
+  border: 1px solid var(--bm-border);
   border-radius: 18px;
 }
 
@@ -517,8 +520,8 @@ function refazer() {
   display: inline-block;
   margin-top: 25px;
   padding: 9px 17px;
-  color: #48ebba;
-  background: #174633;
+  color: var(--bm-gold-text);
+  background: var(--bm-gold-bg);
   border-radius: 24px;
   font-size: 11px;
   letter-spacing: 1px;
@@ -533,10 +536,10 @@ function refazer() {
 
 .painel {
   min-width: 0;
-  background: #101a2a;
-  border: 1px solid #263750;
+  background: var(--bm-surface);
+  border: 1px solid var(--bm-border);
   padding: 28px;
-  border-radius: 14px;
+  border-radius: var(--bm-radius);
 }
 
 .painel h2 { font-size: 22px; margin: 0; }
@@ -552,29 +555,29 @@ function refazer() {
   margin-bottom: 10px;
 }
 
-.caracteristica-topo strong { color: #dce8f5; }
+.caracteristica-topo strong { color: var(--bm-text); }
 
 .resumo-linha {
   display: flex;
   justify-content: space-between;
   gap: 12px;
   padding: 16px 0;
-  border-bottom: 1px solid #28374a;
+  border-bottom: 1px solid var(--bm-border);
   font-size: 13px;
 }
 
-.resumo-linha span { color: #91a2b7; }
+.resumo-linha span { color: var(--bm-text-secondary); }
 .resumo-linha strong { text-align: right; }
 
 .dica {
-  background: #15382e;
-  border: 1px solid #27674d;
+  background: var(--bm-info-bg);
+  border: 1px solid var(--bm-border);
   border-radius: 10px;
   padding: 18px;
   margin-top: 25px;
 }
 
-.dica strong { color: #41e9b4; font-size: 13px; }
+.dica strong { color: var(--bm-text); font-size: 13px; }
 .dica p { margin: 9px 0 0; font-size: 13px; }
 
 .refazer { text-align: center; margin-top: 25px; }
