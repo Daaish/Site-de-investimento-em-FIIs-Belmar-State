@@ -371,9 +371,9 @@ const atalhos = [
 
 <style scoped>
 .atualizar-cotacoes {
-  background: var(--bm-navy);
-  color: var(--bm-surface);
-  border: 1px solid var(--bm-navy);
+  background: var(--bs-action-bg);
+  color: var(--bs-action-text);
+  border: 1px solid var(--bs-action-bg);
   border-radius: 9px;
   padding: 12px 17px;
   font-weight: 700;

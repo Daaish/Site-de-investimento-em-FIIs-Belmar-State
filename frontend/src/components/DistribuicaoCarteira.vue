@@ -9,24 +9,18 @@ import {
   Legend
 } from 'chart.js'
 
+import { useChartTheme } from '../composables/useChartTheme'
 import { useCarteira } from '../composables/useCarteira'
 import { useCotacoes } from '../composables/useCotacoes'
 
 ChartJS.register(ArcElement, Tooltip, Legend)
 
+const chartTheme = useChartTheme()
+
 const { posicoes } = useCarteira()
 const { cotacoes } = useCotacoes()
 
-const cores = [
-  '#168563',
-  '#526F94',
-  '#8D83A6',
-  '#C5A46D',
-  '#C44E55',
-  '#648F97',
-  '#AD805F',
-  '#A2AEBF',
-]
+const cores = computed(() => chartTheme.value.palette)
 
 const moeda = valor =>
   Number(valor).toLocaleString('pt-BR', {
@@ -63,15 +57,15 @@ const dadosGrafico = computed(() => ({
   datasets: [{
     data: distribuicao.value.map(fii => fii.valor ?? 0),
     backgroundColor: distribuicao.value.map(
-      (_, indice) => cores[indice % cores.length]
+      (_, indice) => cores.value[indice % cores.value.length]
     ),
-    borderColor: '#FFFFFF',
+    borderColor: chartTheme.value.surface,
     borderWidth: 3,
     hoverOffset: 8,
   }]
 }))
 
-const opcoes = {
+const opcoes = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
   cutout: '73%',
@@ -80,13 +74,14 @@ const opcoes = {
       display: false,
     },
     tooltip: {
+      ...chartTheme.value.tooltip,
       callbacks: {
         label: contexto =>
           `${contexto.label}: ${moeda(contexto.parsed)}`
       }
     }
   }
-}
+}))
 </script>
 
 <template>
@@ -258,10 +253,9 @@ const opcoes = {
 
   .grafico-card { padding: 17px; }
 }
-</style>
 
 @media (max-width: 760px) {
   .grafico-cabecalho { flex-wrap: wrap; }
-  .grafico-cabecalho h2, .cabecalho h2 { font-size: 20px; }
-  .ranking-titulo { flex-wrap: wrap; gap: 5px; }
+  .grafico-cabecalho h2 { font-size: 20px; }
 }
+</style>

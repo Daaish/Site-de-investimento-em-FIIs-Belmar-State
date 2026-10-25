@@ -369,7 +369,7 @@ function refazer() {
 
 <style scoped>
 .dna-page {
-  --bm-profile-renda: var(--bm-navy-secondary);
+  --bm-profile-renda: var(--bs-progress);
   --bm-profile-crescimento: var(--bm-profile-growth);
   --bm-profile-estabilidade: var(--bm-profile-stability);
   --bm-profile-exploracao: var(--bm-gold);
@@ -403,7 +403,7 @@ function refazer() {
 
 .barra > div {
   height: 100%;
-  background: var(--bm-navy-secondary);
+  background: var(--bs-progress);
   border-radius: 20px;
   transition: width .3s ease;
 }
@@ -443,11 +443,11 @@ function refazer() {
   transition: .2s;
 }
 
-.opcao:hover { border-color: var(--bm-navy-secondary); }
+.opcao:hover { border-color: var(--bs-selection-border); }
 
 .opcao.selecionada {
   background: var(--bm-info-bg);
-  border-color: var(--bm-navy-secondary);
+  border-color: var(--bs-selection-border);
 }
 
 .letra {
@@ -460,7 +460,7 @@ function refazer() {
 
 .check {
   margin-left: auto;
-  color: var(--bm-navy-secondary);
+  color: var(--bs-link);
   font-size: 22px;
 }
 

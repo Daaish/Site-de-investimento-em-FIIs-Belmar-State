@@ -14,6 +14,7 @@ import {
   Filler,
 } from 'chart.js'
 
+import { useChartTheme } from '../composables/useChartTheme'
 import { useCarteira } from '../composables/useCarteira'
 import {
   buscarHistoricos,
@@ -29,6 +30,8 @@ ChartJS.register(
   Legend,
   Filler
 )
+
+const chartTheme = useChartTheme()
 
 const { operacoes } = useCarteira()
 
@@ -177,8 +180,8 @@ const dadosGrafico = computed(() => {
         {
           label: 'Desempenho acumulado (%)',
           data: pontosFiltrados.value.map(p => p.desempenho),
-          borderColor: '#168563',
-          backgroundColor: 'rgba(22,133,99,0.07)',
+          borderColor: chartTheme.value.positive,
+          backgroundColor: chartTheme.value.fill,
           borderWidth: 3,
           pointRadius: 0,
           pointHoverRadius: 5,
@@ -195,7 +198,7 @@ const dadosGrafico = computed(() => {
       {
         label: 'Capital investido',
         data: pontosFiltrados.value.map(p => p.investido),
-        borderColor: '#526F94',
+        borderColor: chartTheme.value.blue,
         borderWidth: 2,
         pointRadius: 0,
         pointHoverRadius: 5,
@@ -205,8 +208,8 @@ const dadosGrafico = computed(() => {
       {
         label: 'Valor de mercado',
         data: pontosFiltrados.value.map(p => p.mercado),
-        borderColor: '#168563',
-        backgroundColor: 'rgba(22,133,99,0.05)',
+        borderColor: chartTheme.value.positive,
+        backgroundColor: chartTheme.value.fill,
         borderWidth: 2.5,
         pointRadius: 0,
         pointHoverRadius: 5,
@@ -230,12 +233,13 @@ const opcoes = computed(() => ({
     legend: {
       position: 'bottom',
       labels: {
-        color: '#63758C',
+        color: chartTheme.value.text,
         usePointStyle: true,
         padding: 20,
       },
     },
     tooltip: {
+      ...chartTheme.value.tooltip,
       callbacks: {
         label: ctx => {
           if (modoGrafico.value === 'desempenho') {
@@ -249,16 +253,18 @@ const opcoes = computed(() => ({
   },
   scales: {
     x: {
+      border: { color: chartTheme.value.border },
       ticks: {
-        color: '#63758C',
+        color: chartTheme.value.text,
         maxTicksLimit: 9,
         maxRotation: 0,
       },
       grid: { display: false },
     },
     y: {
+      border: { color: chartTheme.value.border },
       ticks: {
-        color: '#63758C',
+        color: chartTheme.value.text,
         callback: valor => {
           if (modoGrafico.value === 'desempenho') {
             return `${Number(valor).toFixed(1)}%`
@@ -270,7 +276,7 @@ const opcoes = computed(() => ({
           })
         },
       },
-      grid: { color: '#E1E6ED' },
+      grid: { color: chartTheme.value.border },
     },
   },
 }))
@@ -444,9 +450,9 @@ const opcoes = computed(() => ({
 }
 
 .atualizar {
-  background: var(--bm-navy);
-  color: var(--bm-surface);
-  border: 1px solid var(--bm-navy);
+  background: var(--bs-action-bg);
+  color: var(--bs-action-text);
+  border: 1px solid var(--bs-action-bg);
   border-radius: 9px;
   padding: 11px 16px;
   cursor: pointer;
@@ -473,9 +479,9 @@ const opcoes = computed(() => ({
 }
 
 .filtros button.ativo {
-  background: var(--bm-navy-secondary);
-  border-color: var(--bm-navy-secondary);
-  color: var(--bm-surface);
+  background: var(--bs-action-bg);
+  border-color: var(--bs-selection-border);
+  color: var(--bs-action-text);
 }
 
 .resumo {
@@ -593,8 +599,8 @@ const opcoes = computed(() => ({
 }
 
 .seletor-modo button.ativo {
-  background: var(--bm-navy-secondary);
-  color: var(--bm-surface);
+  background: var(--bs-action-bg);
+  color: var(--bs-action-text);
 }
 
 @media (max-width: 760px) {
@@ -609,10 +615,8 @@ const opcoes = computed(() => ({
   }
 }
 
-</style>
 
 @media (max-width: 760px) {
-  .grafico-cabecalho { flex-wrap: wrap; }
-  .grafico-cabecalho h2, .cabecalho h2 { font-size: 20px; }
-  .ranking-titulo { flex-wrap: wrap; gap: 5px; }
+  .cabecalho h2 { font-size: 20px; }
 }
+</style>

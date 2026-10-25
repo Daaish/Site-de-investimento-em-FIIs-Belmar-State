@@ -11,6 +11,7 @@ import {
   Legend,
 } from 'chart.js'
 
+import { useChartTheme } from '../composables/useChartTheme'
 import { useCarteira } from '../composables/useCarteira'
 
 ChartJS.register(
@@ -20,6 +21,8 @@ ChartJS.register(
   Tooltip,
   Legend
 )
+
+const chartTheme = useChartTheme()
 
 const { operacoes } = useCarteira()
 
@@ -201,7 +204,7 @@ const dadosGrafico = computed(() => ({
     {
       label: 'Confirmados',
       data: resumoMensal.value.map(m => m.confirmados),
-      backgroundColor: '#168563',
+      backgroundColor: chartTheme.value.positive,
       borderRadius: 6,
       maxBarThickness: 28,
       stack: 'proventos',
@@ -209,7 +212,7 @@ const dadosGrafico = computed(() => ({
     {
       label: 'Estimados',
       data: resumoMensal.value.map(m => m.estimados),
-      backgroundColor: '#C5A46D',
+      backgroundColor: chartTheme.value.gold,
       borderRadius: 6,
       maxBarThickness: 28,
       stack: 'proventos',
@@ -217,7 +220,7 @@ const dadosGrafico = computed(() => ({
   ],
 }))
 
-const opcoesGrafico = {
+const opcoesGrafico = computed(() => ({
   responsive: true,
   maintainAspectRatio: false,
   interaction: {
@@ -228,12 +231,13 @@ const opcoesGrafico = {
     legend: {
       position: 'bottom',
       labels: {
-        color: '#63758C',
+        color: chartTheme.value.text,
         padding: 20,
         usePointStyle: true,
       },
     },
     tooltip: {
+      ...chartTheme.value.tooltip,
       callbacks: {
         label: contexto =>
           `${contexto.dataset.label}: ${moeda(contexto.parsed.y)}`,
@@ -242,15 +246,17 @@ const opcoesGrafico = {
   },
   scales: {
     x: {
+      border: { color: chartTheme.value.border },
       stacked: true,
-      ticks: { color: '#63758C' },
+      ticks: { color: chartTheme.value.text },
       grid: { display: false },
     },
     y: {
+      border: { color: chartTheme.value.border },
       stacked: true,
       beginAtZero: true,
       ticks: {
-        color: '#63758C',
+        color: chartTheme.value.text,
         callback: valor =>
           Number(valor).toLocaleString('pt-BR', {
             style: 'currency',
@@ -258,10 +264,10 @@ const opcoesGrafico = {
             maximumFractionDigits: 0,
           }),
       },
-      grid: { color: '#E1E6ED' },
+      grid: { color: chartTheme.value.border },
     },
   },
-}
+}))
 
 function mudarAno(direcao) {
   ano.value += direcao
@@ -422,7 +428,7 @@ function mudarAno(direcao) {
 }
 
 .seletor-ano button {
-  background: var(--bm-navy-secondary);
+  background: var(--bs-action-bg);
   border: 0;
   border-radius: 7px;
   width: 32px;
@@ -588,10 +594,9 @@ function mudarAno(direcao) {
   .indicadores { grid-template-columns: 1fr; }
   .grafico { height: 270px; }
 }
-</style>
 
 @media (max-width: 760px) {
-  .grafico-cabecalho { flex-wrap: wrap; }
-  .grafico-cabecalho h2, .cabecalho h2 { font-size: 20px; }
+  .cabecalho h2 { font-size: 20px; }
   .ranking-titulo { flex-wrap: wrap; gap: 5px; }
 }
+</style>

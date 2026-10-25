@@ -546,13 +546,13 @@ const diasSemana = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']
   height: 35px;
   border: 1px solid var(--bm-input-border);
   border-radius: 8px;
-  background: var(--bm-navy-secondary);
-  color: var(--bm-surface);
+  background: var(--bs-action-bg);
+  color: var(--bs-action-text);
   font-size: 25px;
   cursor: pointer;
 }
 
-.navegacao-mes button:hover { border-color: var(--bm-navy-secondary); }
+.navegacao-mes button:hover { border-color: var(--bs-selection-border); }
 
 .legenda {
   display: flex;
@@ -597,10 +597,10 @@ const diasSemana = ['Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom']
 }
 
 .dia-calendario.clicavel { cursor: pointer; }
-.dia-calendario.clicavel:hover { border-color: var(--bm-navy-secondary); }
+.dia-calendario.clicavel:hover { border-color: var(--bs-selection-border); }
 .dia-calendario.vazio { background: transparent; border-color: transparent; }
 .dia-calendario.hoje { border-color: var(--bm-gold); }
-.dia-calendario.selecionado { background: var(--bm-info-bg); border-color: var(--bm-navy-secondary); }
+.dia-calendario.selecionado { background: var(--bm-info-bg); border-color: var(--bs-selection-border); }
 
 .numero-dia { font-size: 13px; font-weight: 600; }
 .indicadores-dia { display: flex; gap: 3px; flex-wrap: wrap; margin: 10px 0 5px; }
@@ -620,7 +620,7 @@ input, select {
   font: inherit;
 }
 
-input:focus, select:focus { border-color: var(--bm-navy-secondary); }
+input:focus, select:focus { border-color: var(--bs-selection-border); }
 .botao-full { width: 100%; border: 0; margin-top: 14px; cursor: pointer; }
 
 .lista-eventos { margin-top: 24px; }
@@ -652,7 +652,7 @@ input:focus, select:focus { border-color: var(--bm-navy-secondary); }
 .sucesso { background: var(--bm-info-bg); color: var(--bm-text); }
 
 .estado-vazio { text-align: center; padding: 45px 12px; color: var(--bm-text-secondary); }
-.estado-vazio div { font-size: 40px; color: var(--bm-navy-secondary); }
+.estado-vazio div { font-size: 40px; color: var(--bs-link); }
 .estado-vazio h3 { margin: 12px 0 0; }
 .aviso-dados { font-size: 12px; margin-top: 20px; }
 

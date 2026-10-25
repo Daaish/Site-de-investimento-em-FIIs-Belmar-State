@@ -1,9 +1,11 @@
 
 <script setup>
 import { computed, ref, watch } from 'vue'
+import { useTheme } from './composables/useTheme'
 import BelmarLogo from './components/BelmarLogo.vue'
 import { RouterLink, RouterView, useRoute } from 'vue-router'
 
+const { isDark, toggleTheme } = useTheme()
 const menuAberto = ref(false)
 const route = useRoute()
 const secaoAtual = computed(() => menu.find(item => item.rota === route.path)?.nome || 'Plataforma')
@@ -64,6 +66,22 @@ const menu = [
       <header class="topbar">
         <div class="breadcrumb"><span>BELMAR STATE / PLATAFORMA</span><strong>{{ secaoAtual }}</strong></div>
         <div class="topbar-right">
+          <button
+            class="theme-toggle"
+            type="button"
+            :aria-label="isDark ? 'Ativar Belmar Light' : 'Ativar Belmar Dark'"
+            :title="isDark ? 'Ativar Belmar Light' : 'Ativar Belmar Dark'"
+            :aria-pressed="isDark"
+            @click="toggleTheme"
+          >
+            <svg v-if="isDark" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7">
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5L19 19M5 19l1.5-1.5M17.5 6.5L19 5" />
+            </svg>
+            <svg v-else viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7">
+              <path d="M20.5 14.1A9 9 0 0 1 9.9 3.5a9 9 0 1 0 10.6 10.6Z" />
+            </svg>
+          </button>
           <span class="demo-indicator">● Ambiente demonstrativo</span>
           <div class="top-avatar">IV</div>
         </div>

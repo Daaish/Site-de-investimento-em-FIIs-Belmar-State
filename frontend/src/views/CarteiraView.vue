@@ -632,7 +632,7 @@ select {
 
 input:focus,
 select:focus {
-  border-color: var(--bm-navy-secondary);
+  border-color: var(--bs-selection-border);
 }
 
 .botao-full {
@@ -678,8 +678,8 @@ select:focus {
 }
 
 .botao-secundario:hover {
-  border-color: var(--bm-navy-secondary);
-  color: var(--bm-navy-secondary);
+  border-color: var(--bs-selection-border);
+  color: var(--bs-link);
 }
 
 .tipo-operacao {
@@ -707,7 +707,7 @@ select:focus {
 
 .estado-vazio div {
   font-size: 40px;
-  color: var(--bm-navy-secondary);
+  color: var(--bs-link);
 }
 
 .estado-vazio h3 {

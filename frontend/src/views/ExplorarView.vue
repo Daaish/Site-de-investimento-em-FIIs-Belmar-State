@@ -317,16 +317,16 @@ function limparFiltros() {
 .cabecalho p { margin: 0; }
 
 .atualizar, .limpar {
-  background: var(--bm-navy);
-  border: 1px solid var(--bm-navy);
-  color: var(--bm-surface);
+  background: var(--bs-action-bg);
+  border: 1px solid var(--bs-action-bg);
+  color: var(--bs-action-text);
   padding: 12px 17px;
   border-radius: 9px;
   cursor: pointer;
 }
 
 .atualizar:hover, .limpar:hover {
-  background: var(--bm-navy-secondary);
+  background: var(--bs-action-bg);
 }
 
 .atualizar:disabled { opacity: .5; cursor: not-allowed; }
@@ -342,7 +342,7 @@ function limparFiltros() {
   margin: 27px 0;
 }
 
-.aviso-base > span { font-size: 24px; color: var(--bm-navy-secondary); }
+.aviso-base > span { font-size: 24px; color: var(--bs-link); }
 .aviso-base strong { font-size: 13px; }
 .aviso-base p { font-size: 12px; margin: 5px 0 0; }
 
@@ -405,7 +405,7 @@ function limparFiltros() {
 }
 
 .campo input:focus, .campo select:focus {
-  border-color: var(--bm-navy-secondary);
+  border-color: var(--bs-selection-border);
 }
 
 .resultados-topo { margin-top: 35px; }
@@ -439,7 +439,7 @@ function limparFiltros() {
   height: 46px;
   border-radius: 12px;
   background: var(--bm-surface-muted);
-  color: var(--bm-navy-secondary);
+  color: var(--bs-link);
   font-weight: 800;
   display: grid;
   place-items: center;
@@ -490,7 +490,7 @@ function limparFiltros() {
 }
 
 .fundo-rodape span { color: var(--bm-text-secondary); font-size: 11px; }
-.link-carteira { color: var(--bm-navy-secondary); font-weight: 700; font-size: 12px; }
+.link-carteira { color: var(--bs-link); font-weight: 700; font-size: 12px; }
 
 .estado-vazio, .mensagem-erro {
   text-align: center;
@@ -500,11 +500,11 @@ function limparFiltros() {
   padding: 45px 20px;
 }
 
-.icone-vazio { color: var(--bm-navy-secondary); font-size: 45px; }
+.icone-vazio { color: var(--bs-link); font-size: 45px; }
 .mensagem-erro p { color: var(--bm-warning-text); }
 .mensagem-erro button {
-  background: var(--bm-navy-secondary);
-  color: var(--bm-surface);
+  background: var(--bs-action-bg);
+  color: var(--bs-action-text);
   border: 0;
   border-radius: 8px;
   padding: 11px 18px;
