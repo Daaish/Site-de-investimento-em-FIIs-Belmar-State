@@ -121,3 +121,39 @@ test('gráfico de cripto reage ao tema sem trocar seleção, período, pontos ou
     }
   } finally { scope.stop() }
 })
+
+test('Academy: gráfico legível e estado de lição, simulador e quiz preservado ao alternar Light/Dark', async () => {
+  const { useAcademy } = await import('../src/composables/useAcademy.js')
+  const academy = useAcademy()
+  academy.abrirModulo('fiis'); academy.irParaLicao(2)
+  Object.assign(academy.formulario, { inicial: 1000, aporte: 50, anos: 2, taxaAnual: -10 })
+  academy.area.value = 'quiz'; academy.responder(1)
+  const props = vue.reactive({ pontos: academy.simulacao.value.resultado.pontos })
+  const source = parseSfc(read('../src/components/academy/GraficoSimulacao.vue')).descriptor.scriptSetup.content
+  const chart = evaluate(source, { computed: vue.computed, useChartTheme, ChartJS: { register() {} }, defineProps: () => props, getComputedStyle: properties, document }, ['dados', 'opcoes'])
+  const inicial = JSON.stringify(props.pontos)
+  for (const t of ['light', 'dark', 'light']) {
+    theme.value = t; await vue.nextTick()
+    const colors = useChartTheme().value
+    assert.equal(chart.opcoes.value.scales.y.ticks.color, colors.text)
+    assert.equal(chart.opcoes.value.scales.y.grid.color, colors.border)
+    assert.equal(chart.opcoes.value.plugins.legend.labels.color, colors.text)
+    assert.equal(chart.opcoes.value.plugins.tooltip.backgroundColor, colors.tooltip.backgroundColor)
+    assert.equal(chart.dados.value.datasets[0].borderColor, properties().getPropertyValue('--bs-gold-text'))
+    assert.equal(chart.dados.value.datasets[1].borderColor, colors.blue)
+    const luminancia = hex => {
+      const rgb = hex.match(/[a-f0-9]{2}/gi).map(c => parseInt(c, 16) / 255).map(c => c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4)
+      return rgb[0] * 0.2126 + rgb[1] * 0.7152 + rgb[2] * 0.0722
+    }
+    for (const dataset of chart.dados.value.datasets) {
+      const a = luminancia(dataset.borderColor), b = luminancia(colors.surface)
+      assert.ok((Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05) >= 3, 'contraste mínimo de 3:1 para as linhas')
+    }
+    assert.notEqual(chart.dados.value.datasets[0].borderColor, colors.blue)
+    assert.deepEqual(chart.dados.value.datasets[1].borderDash, [6, 4])
+    assert.equal(academy.moduloId.value, 'fiis'); assert.equal(academy.indiceLicao.value, 2)
+    assert.equal(academy.area.value, 'quiz'); assert.equal(academy.respondidas.value, 1)
+    assert.equal(academy.formulario.taxaAnual, -10); assert.equal(JSON.stringify(props.pontos), inicial)
+    assert.ok(academy.simulacao.value.resultado.rendimento < 0)
+  }
+})

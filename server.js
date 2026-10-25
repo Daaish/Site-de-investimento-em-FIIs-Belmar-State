@@ -7,8 +7,12 @@ require('dotenv').config()
 const { buscarCotacao, buscarHistorico } = require('./services/cotacoes')
 
 const app = express();
-app.use('/auth', require('./routes/auth').criarRouterAuth());
+const privado = require('./middleware/privado').criarMiddlewarePrivado()
+app.use(['/auth', '/carteira'], privado)
+app.use('/auth', require('./routes/auth').criarRouterAuth({ sessaoCompartilhada: true }));
+app.use('/carteira', require('./routes/carteira').criarRouterCarteira());
 app.use(cors());
+app.use('/cripto', require('./routes/cripto').criarRouterCripto());
 
 // Catálogo local: não depende da disponibilidade da API de mercado.
 app.get('/buscar', (req, res) => {

@@ -147,6 +147,10 @@ test('rotas Vue reais: sessão expirada redireciona, catálogo continua público
   assert.equal(router.currentRoute.value.name, 'login')
   await router.push('/explorar')
   assert.equal(router.currentRoute.value.name, 'explorar')
+  await router.push('/academy')
+  assert.equal(router.currentRoute.value.name, 'academy')
+  await router.push('/digital')
+  assert.equal(router.currentRoute.value.name, 'digital')
   logged = true
   await auth.entrar({})
   await router.push('/login')
