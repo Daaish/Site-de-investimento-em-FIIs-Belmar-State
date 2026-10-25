@@ -1,0 +1,22 @@
+[
+  {
+    "codigo": "HGLG11",
+    "tipo": "Tijolo",
+    "setor": "Logístico"
+  },
+  {
+    "codigo": "KNRI11",
+    "tipo": "Tijolo",
+    "setor": "Híbrido"
+  },
+  {
+    "codigo": "MXRF11",
+    "tipo": "Papel",
+    "setor": "CRI"
+  },
+  {
+    "codigo": "VISC11",
+    "tipo": "Tijolo",
+    "setor": "Shoppings"
+  }
+]

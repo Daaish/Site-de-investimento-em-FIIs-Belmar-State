@@ -1,4 +1,5 @@
 const { createHash } = require('node:crypto')
+const { normalizarParametrosCatalogo } = require('./parametrosCatalogo')
 const { criarCacheMercado } = require('./cacheMercado')
 const { criarClienteBrapi, ErroMercado } = require('./brapi')
 
@@ -87,7 +88,49 @@ function criarServicoMercado({
       },
     })
   }
-  return { buscarCotacao, buscarHistorico }
+  function listarFiis(query = {}) {
+    const parametros = normalizarParametrosCatalogo(query)
+    // Reuse this service's credentials, cache, queue and 429 cooldown.
+    const { token, escopo } = contexto('CATALOGO')
+    return cache.consultar(JSON.stringify(['listagem-fii', escopo, parametros]), {
+      ttl: 15 * 60_000, idadeMaxima: 24 * 60 * 60_000,
+      carregar: async () => {
+        const url = new URL('https://brapi.dev/api/quote/list')
+        url.searchParams.set('subType', 'fii')
+        for (const [key, value] of Object.entries(parametros)) if (value !== '') url.searchParams.set(key, String(value))
+        const json = await cliente.consultar(url, token, 10_000)
+        const invalidar = () => { throw new ErroMercado('RESPOSTA_INVALIDA') }
+        if (!json || !Array.isArray(json.stocks) || json.stocks.length > parametros.limit ||
+            json.currentPage !== parametros.page || json.itemsPerPage !== parametros.limit ||
+            !Number.isSafeInteger(json.totalCount) || json.totalCount < 0 ||
+            !Number.isSafeInteger(json.totalPages) || json.totalPages < 0 ||
+            typeof json.hasNextPage !== 'boolean' ||
+            json.totalPages !== Math.ceil(json.totalCount / parametros.limit) ||
+            json.hasNextPage !== (parametros.page < json.totalPages)) invalidar()
+        const codigos = new Set()
+        const itens = json.stocks.map(item => {
+          if (!item || typeof item.stock !== 'string' || !/^[A-Z0-9]{5,12}$/.test(item.stock) ||
+              item.subType !== 'fii' || codigos.has(item.stock)) invalidar()
+          codigos.add(item.stock)
+          if (item.close !== null && item.close !== undefined && (!numeroValido(item.close) || Number(item.close) < 0)) invalidar()
+          return {
+            codigo: item.stock, nome: typeof item.name === 'string' ? item.name : item.stock,
+            tipo: null, subtipo: 'fii', setor: typeof item.sector === 'string' ? item.sector : null,
+            preco: numeroValido(item.close) && Number(item.close) > 0 ? Number(item.close) : null,
+            dy: null, pvp: null, atualizadoEm: null,
+          }
+        })
+        const esperados = Math.min(parametros.limit, Math.max(0, json.totalCount - (parametros.page - 1) * parametros.limit))
+        if (itens.length !== esperados) invalidar()
+        return {
+          itens, paginacao: { page: json.currentPage, limit: json.itemsPerPage, total: json.totalCount,
+            totalPages: json.totalPages, hasNextPage: json.hasNextPage },
+          origem: 'brapi', consultadoEm: new Date().toISOString(),
+        }
+      },
+    })
+  }
+  return { buscarCotacao, buscarHistorico, listarFiis }
 }
 
 module.exports = { ...criarServicoMercado(), criarServicoMercado, normalizarTicker }
